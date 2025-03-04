@@ -1,0 +1,20 @@
+class Solution {
+public:
+    vector<int> plusOne(vector<int>& digits) {
+
+        for(int i=digits.size()-1; i>=0; i--){
+            if(digits[i] == 9){
+                digits[i] = 0;
+            }
+            else{
+                digits[i]++;
+                return digits;
+            }
+        }
+
+        //edges case ager array me 9 9 9  haito 1 size bara karna parega
+        vector<int> newdigits(digits.size()+1, 0);
+        newdigits[0] = 1;
+        return newdigits;
+    }
+};
