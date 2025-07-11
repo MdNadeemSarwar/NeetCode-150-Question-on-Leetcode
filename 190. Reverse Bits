@@ -1,0 +1,24 @@
+ //Hum ekdam last bit nikalte hain
+//Fir us bit ko uska mirror position pe bhejte hain
+//Ab jo bit mirror jagah pe gaya hai, usko final answer me chipka do
+// Agar ans me pehle se wo bit 0 tha, to temp ka bit set ho jaayega.
+// Agar ans me already set hai, to koi farq nahi (OR operation safe hai)
+
+TC-> O(1)
+SC-> O(1)
+
+
+class Solution {
+public:
+    uint32_t reverseBits(uint32_t n) {
+
+    int ans = 0;
+    for (int i = 0; i < 32; i++) {
+            int lsb = n & 1; 
+            int temp = lsb << (31 - i);
+            ans = ans | temp; 
+            n = n >> 1;
+        }
+        return ans;
+    }
+};
