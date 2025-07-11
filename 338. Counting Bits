@@ -12,3 +12,25 @@ public:
         return ans;
     }
 };
+-----------------------------------------------------------------------------------------------------------------------------------------
+-> Agar is question me STL function yane builitin function use nahi karne deya to ye DP ka Tabulization method use kar lenge 
+-> isme dp use kar rahe hai isleye ham 1 array banaye hai array ke 1 bara size ka wayse bhi aready 0 base indexing hai or hame n element ka 1s count rakhna hai +o ti n+1 ho hi jata hai 
+ans[i] = ans[1] index me ans[i >> 1] -> 0001 >> 1 -> 0000 hogaya // right shift me right se left jayega element + 1 & 1 -> 0001 & 0001 -> 0001 -> 1
+to ans[1] = 0 + 1 -> 1 jayeag yane arr[] -> [0 1 0 0 0 0] ye hua 
+-> agle bar me ans[2] -> 00010 >> 1 -> 00001 -> 1   -> 2 & 1 -> 00010 & 0001 -> 0000 - >0  =>> 1 + 0 -> ans[2] = [0 1 1 0 0 0] ans so one chalta jayega
+
+
+TC- O(N)
+SC- O(N)
+
+class Solution {
+public:
+    vector<int> countBits(int n) {
+        vector<int>ans(n+1,0);
+
+        for(int i=1; i<=n; i++){
+            ans[i] = ans[i >> 1] + (i & 1);
+        }
+        return ans;
+    }
+};
