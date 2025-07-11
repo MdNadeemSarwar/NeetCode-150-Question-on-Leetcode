@@ -1,10 +1,14 @@
+Ye function __builtin_popcount apne number ki bits me 1s ko count karke de deta hai ye STL Func hai 
+TC- O(1)
+SC- O(N)
+
 class Solution {
 public:
     vector<int> countBits(int n) {
-        vector<int> result(n+1);
-        for(int i = 0; i<n+1; i++) {
-            result[i] = __builtin_popcount(i); //log(n)
+        vector<int>ans(n+1);
+        for(int i=0; i<=n; i++){
+            ans[i] = __builtin_popcount(i);
         }
-        return result;
+        return ans;
     }
 };
