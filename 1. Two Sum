@@ -1,0 +1,41 @@
+ye Bruts Force Approch-----------------------------------------
+TC-> 0(N)2
+SC-> O(1)
+
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        for(int i=0; i<nums.size(); i++){
+            for(int j = i+1; j<nums.size(); j++){
+                if(nums[i] + nums[j] == target){
+                    return {i, j};
+                }
+            }
+        }
+        return{};
+    }
+};
+---------------------------------------------------------------------------------------------
+isme ham unordered map bana ke complement store karenge 
+TC->O(N)
+SC->O(N)
+Har step pe hum dekh rahe the target - nums[i] pehle map me hai ya nahi.
+Agar hai → uska index + current index = answer.
+Nahi mila to store kar lo.
+
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        
+        unordered_map<int, int>maps;
+        for(int i=0; i<nums.size(); i++){
+            int complement = target - nums[i];
+
+            if(maps.find(complement) != maps.end()){
+                return {maps[complement], i};
+            }
+            maps[nums[i]] = i;
+        }
+        return {};
+    }
+};
