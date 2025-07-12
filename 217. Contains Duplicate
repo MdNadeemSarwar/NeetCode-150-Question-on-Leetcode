@@ -16,3 +16,26 @@ public:
         return false;
     }
 };
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Har eleemnt ko nekalo 1 1 karke usko insert karna hai lekin set me se checak karna hai ki agar wo set me already hai to true hai nahi to false hpga 
+
+TC->O(N)
+SC->O(N)
+
+class Solution {
+public:
+    bool containsDuplicate(vector<int>& nums) {
+        unordered_set<int>set;
+        
+        for(auto no : nums){
+            if(set.count(no)){
+                return true;
+            }
+            else{
+                set.insert(no);
+            }
+        }
+        return false;
+    }
+};
