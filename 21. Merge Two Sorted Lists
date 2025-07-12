@@ -1,0 +1,34 @@
+isme 2no list ke value ko nekal ke 1 array me dallo 
+phir us aary ko sort kardo 
+phir uss array ke value ke hesab se linklist baando uske wo value dal ke return karke dedo
+
+TC-> O(N)
+SC-> O(N)
+
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        vector<int>arr;
+
+        ListNode* temp = list1;
+        while(temp != NULL){
+            arr.push_back(temp->val);
+            temp = temp ->next;
+        }
+        temp = list2;
+        while(temp != NULL){
+            arr.push_back(temp->val);
+            temp = temp ->next;
+        }
+        sort(arr.begin(), arr.end());
+
+        ListNode* xnode = new ListNode(0);
+        ListNode* newnode = xnode;
+
+        for(auto x : arr){
+            newnode -> next = new ListNode(x);
+            newnode = newnode->next;
+        }
+        return xnode -> next;
+    }
+};
