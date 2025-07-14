@@ -1,0 +1,29 @@
+---------------------------------------------------------------------------Pattern 2: Sliding Window (Variable Size)----------------------------------------------------------------------------
+
+Ek window banao using start and end pointers
+Har baar end++ karke window expand karo
+Jab tak condition satisfy ho → window chalta rahe
+Jaise hi condition break ho → start++ karke window shrink karo
+Har step pe answer update karo (length ya sum ya count)
+TC-> O(N)
+SC-> O(K)
+
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int longestmax = 0;
+        int start = 0;
+        unordered_set<char>set;
+
+        for(int i=0; i<s.size(); i++){
+
+            while(set.count(s[i])){
+                set.erase(s[start]);
+                start++;
+            }
+            set.insert(s[i]);
+            longestmax =  max(longestmax, i - start + 1);
+        }
+        return longestmax;
+    }
+};
