@@ -1,0 +1,27 @@
+Tc-> O(log n)
+Sc-> O(1)
+
+class Solution {
+public:
+    bool isHappy(int n) {
+        unordered_set<int> seen;
+
+        while(n != 1 && !seen.count(n)){
+
+            int totalsum = 0;
+
+            while(n > 0){
+                int digit  = n % 10;
+                totalsum = sotalsum + digit * digit;
+                n = n / 10;
+            }
+            n = totalsum;
+        }
+        if(n == 1){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+};
