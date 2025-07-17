@@ -12,3 +12,37 @@ public:
 
     }
 };
+
+
+--------------------------------------------------------------------------------------------------------------------------
+
+Heap is a tree-based data structure. Priority Queue heap ko internally use karta hai.
+priority_queue<int> by default → Max Heap (sabse bada top pe)
+priority_queue<int, vector<int>, greater<int>> → Min Heap (sabse chhota top pe)
+🤔 Why Min Heap here?
+Humko k-th largest chahiye. So idea yeh hai:
+Ek min-heap banate hain of size k
+Jab bhi heap size k se zyada ho jaaye, to chhota element hata do
+Jab pura array process ho jaaye, tab heap ke top pe hoga k-th largest
+
+Tc-> O(Loogn)
+sc-> o(n)
+
+
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+
+       priority_queue<int, vector<int>, greater<int>> minHeap;
+
+        for (int x : nums) {
+            minHeap.push(x);                  // Step 1: Push karo
+            if (minHeap.size() > k) {
+                minHeap.pop();                  // Step 2: Agar size zyada, to chhota hata do
+            }
+        }
+
+        return minHeap.top();   
+
+    }
+};
