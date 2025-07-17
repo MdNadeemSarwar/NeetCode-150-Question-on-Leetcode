@@ -1,0 +1,14 @@
+
+pahle maine sort kardeya decending order me then kth element ke hesab se us array ke kth - 1 q ki kth jo hai wo 0 base indexing karta haina isleye bas us index ko value ko return kardey a
+TC-> O(nlogn)
+SC-> O(logn)
+ye tc or sc stl sort karne pe laga hai 
+
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        sort(nums.begin(), nums.end(), greater<int>());
+        return nums[k-1];
+
+    }
+};
