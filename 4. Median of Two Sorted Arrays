@@ -1,0 +1,28 @@
+Aapko do sorted arrays diye gaye hain:
+Aapko in dono arrays ka median nikalna hai.
+Agar elements ka count odd ho: middle element hi median hota hai
+Agar count even ho: 2 middle elements ka average median hota hai
+Dono arrays ko merge karke ek sorted array banao & Fir uska median nikal lo.
+hoga to 2number ke bach ka hoga na to 1st number or secodn number ko add akrke uska mid nekal ke dena hai
+
+Bruts force approcah
+TC-> O( loh n + m)
+SC-> O(n + m)
+
+class Solution {
+public:
+    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+        for(int i=0; i<nums2.size(); i++){
+            nums1.push_back(nums2[i]);
+        }
+        sort(nums1.begin(), nums1.end());
+        int n = nums1.size();
+
+        if(n % 2 == 1){ // even
+            return nums1[n/2];
+        }
+        else{ // even 
+            return ( nums1[n/2 - 1] + nums1[n/2]) / 2.0;
+        }
+    }
+};
