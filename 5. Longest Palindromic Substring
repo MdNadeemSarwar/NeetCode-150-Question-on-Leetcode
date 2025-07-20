@@ -1,0 +1,52 @@
+Aapko ek string di gayi hai, usme se longest palindromic substring find karna hai
+🔹 Logic / Intuition:
+Har index ko center maan kar expand karo ->  2 cases check karne padenge: string ka length odd hoga to odd wala while loop chalega nahi to size even hoga to even wala chalega
+Odd length palindrome: left = i - 1 Right = i + 1;
+Even length palindrome: Left = i - 1; right = i;
+Dono directions (left & right) me expand karo jab tak characters match karte ho.
+Har expansion me agar naya palindrome bada ho maxLength or start ko update karo
+then Last me return: s.substr(start, maxLength) kardo
+
+TC-> O(n²)
+SC-> O(1)
+
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        int maxlen = 1;
+        int start = 0;
+
+        for(int i=1; i<n; i++){
+
+            //odd length palindrome 
+            int left = i-1;
+            int right = i+1;
+
+            while(left >= 0 && right < s.size() && s[left] == s[right]){
+                if((right - left + 1) > maxlen){
+                    maxlen = right - left + 1;
+                    start = left;
+                }
+                left--;
+                right++;
+            }
+
+            //Even case Palindrome
+            left = i - 1;
+            right = i;
+
+            while(left >= 0 && right < s.size() && s[left] == s[right]){
+                if((right - left + 1) > maxlen){
+                    maxlen = right - left + 1;
+                    start = left;
+                }
+                left--;
+                right++;
+            }
+
+        }
+
+        return s.substr(start, maxlen);
+    }
+};
