@@ -1,0 +1,30 @@
+isme 1 array ke andar 3 array hai us array ke adar ki value nekal ke sabko 1 fresh array me dal denge us array ke value ko sort kardenge then us sorted value ko array se nekal nekal ke linklist  me dal denge 
+Tc-> o(N) hoga q ki har nodes 1 bar visit ho raha hai lekin sorting karna me o(n log n ) lagga isleye iska TC-> O(nlog n) hua
+Sc-> o(N) q ki 1 vector banaye hai 
+
+class Solution {
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+       
+        vector<int>arr;
+
+        for(auto temp : lists){
+            while(temp != NULL){
+                arr.push_back(temp->val);
+                temp = temp->next;
+            }
+        }
+
+        sort(arr.begin(), arr.end());
+
+        ListNode* dummy = new ListNode(0);
+        ListNode* newnode = dummy;
+
+        for(int x : arr){
+            newnode -> next = new ListNode(x);
+            newnode = newnode ->next;
+        }
+        return dummy ->next;
+
+    }
+};
