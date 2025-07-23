@@ -1,0 +1,61 @@
+Ye Solution sahi hai lekin TLE Marega q ki dono ka jo num1 or num2 hai usme bahut bara bara numbber hai isleya agar sochoge ki pura ka pura nejak ke number me conver karke sakh deta hai bad me sedha multiply kar denge to ye possible nahi hau 
+isleye 1 vector banake usme rakhhe or left side or ayse karke nekalo then uska carry rakho ye sab hoga step b step use chat gpt 
+
+
+class Solution {
+public:
+    string multiply(string num1, string num2) {
+        long long list1 = 0;
+        long long list2 = 0;
+
+        for(int i=0; i<num1.size(); i++){
+            int digit = (num1[i] - '0');
+            list1 = list1 * 10 + digit;
+        }
+        for(int i=0; i<num2.size(); i++){
+            int digit = (num2[i] - '0');
+            list2 = list2 * 10 + digit;
+        }
+
+        long long total = list1 * list2;
+
+        string ans = to_string(total);
+        return ans;
+    }
+};
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Best Solution jisme TLE Nahi marega neche
+
+class Solution {
+public:
+    string multiply(string num1, string num2) {
+
+        int n = num1.size();
+        int m = num2.size();
+
+        if (num1 == "0" || num2 == "0"){
+           return "0";
+        }
+            
+      
+        vector<int>arr(n+m, 0);
+
+        for(int i= n-1; i>=0; i--){
+            for(int j= m-1; j>=0; j--){
+                int value = (num1[i] - '0') * (num2[j] - '0');
+                int sum = value + arr[i + j + 1];
+
+                arr[i+j+1] = sum % 10;
+                arr[i+j] += sum / 10;
+            }
+        }
+        string ans = "";
+
+        for(int digit : arr){
+            if (ans.empty() && digit == 0) continue;
+            ans = ans + to_string(digit);
+        }
+        return ans;
+
+    }
+};
