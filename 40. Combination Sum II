@@ -1,0 +1,47 @@
+Hume unique combinations chahiye jisme har number sirf ek hi baar use ho aur duplicate combinations allowed nahi hain.
+Isliye sabse pehle array ko sort karte hain, taaki same numbers ek saath aa jaayein. Ye hume help karega duplicates ko skip karne me.
+Har step pe hum recursion + backtracking se combinations try karte hain:
+Har element ke liye decide karte hain: include karo ya skip karo.
+Jab koi number use kar lete hain, toh agle recursive call me hum next index se start karte hain, taaki ek number bar-bar repeat na ho.
+Sabse important step:
+Agar current index i ka element same hai previous (i-1) ke, aur i > start hai, toh skip kar do.
+Ye check ye ensure karta hai ki same recursion level me same number se baar-baar combination start na ho, warna duplicate combinations mil jaayenge.
+Jab target zero ho jaata hai, iska matlab combination ready hai → usse store kar lete hain.
+Har recursive call ke baad backtrack karte hain — jo element add kiya tha, use hata dete hain.
+
+TC=> O(2^n)
+SC=> O(n)
+
+class Solution {
+public:
+    void solve(int start, vector<int>& candidates, int target, vector<int>temp, vector<vector<int>>&ans){
+        
+        if(target == 0){
+            ans.push_back(temp);
+            return;
+        }
+
+        for(int i=start; i<candidates.size(); i++){
+            if(i > start && candidates[i] == candidates[i-1]){
+                continue;  // Skip duplicate elements on the same level
+            }
+            // If current element is greater than remaining target, break (no use in going ahead)
+            if(candidates[i] > target){
+                break;
+            }
+            temp.push_back(candidates[i]);
+            solve(i+1, candidates, target - candidates[i], temp, ans); // i+1 because no reuse
+            temp.pop_back(); // backtrack
+        }
+
+    }
+    
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+        vector<int>temp;
+        vector<vector<int>>ans;
+        sort(candidates.begin(), candidates.end());
+
+        solve(0, candidates, target, temp , ans);
+        return ans;
+    }
+};
