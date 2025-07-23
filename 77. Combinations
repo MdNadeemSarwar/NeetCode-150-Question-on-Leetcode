@@ -1,0 +1,30 @@
+ Hume n numbers (1 to n) me se k elements ka combination chahiye.
+- Har number pe 2 choices hoti hai: include karein ya skip karein.
+- Isko recursion aur backtracking se solve karte hain.
+- Jab k elements temp list me aa jayein, toh usko result me store kar lete hain.
+- Taaki duplicate combination na aaye, hum recursion me hamesha aage ke elements se call karte hain (i+1 se).
+
+TC->O(N+K)
+SC->O(N)
+
+class Solution {
+public:
+    void solve(int start, int n, int k, vector<int>&temp, vector<vector<int>>&ans){
+        if(temp.size() == k){
+            ans.push_back(temp);
+            return;
+        }
+
+        for(int i = start; i<= n; i++){
+            temp.push_back(i); // element add karo
+            solve(i+1, n, k, temp, ans);// next index se call
+            temp.pop_back();// backtrack
+        }
+    }
+    vector<vector<int>> combine(int n, int k) {
+       vector<int>temp;
+       vector<vector<int>>ans;// 1 se start karenge
+       solve(1, n, k, temp, ans); 
+       return ans;
+    }
+};
