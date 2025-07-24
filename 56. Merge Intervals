@@ -1,0 +1,34 @@
+TC->O(n log n) + O(n) = O(n log n)  becase sorting use hua hai 
+Sc-> O(N) 
+
+Agar intervals overlap karte hain, toh unhe ek interval me merge kar do.
+Lekin merge karne ke liye intervals ko sort karna zaruri hai (based on start time), taaki hum pehle wale interval ke baad ka next interval dekhe sakein aur decide kar sakein ki overlap ho raha hai ya nahi
+
+
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        vector<vector<int>>ans;
+
+        sort(intervals.begin(), intervals.end()); // Step 1: Sort intervals by start time
+
+        ans.push_back(intervals[0]); // Step 2: Put first interval in ans
+
+        for(int i=1; i< intervals.size(); i++){
+
+            int lastend = ans.back()[1];  // Last inserted interval ka end
+            int currstart = intervals[i][0]; // Current interval ka start
+            int currend = intervals[i][1];  // Current interval ka end
+
+            if(currstart <= lastend){
+                
+                ans.back()[1] = max(lastend, currend); //merge ka case hai Merge karna hoga
+            }
+            else{
+                ans.push_back(intervals[i]);// No overlap, push directly
+            }
+
+        }
+        return ans;
+    }
+};
