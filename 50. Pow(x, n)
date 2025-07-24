@@ -1,0 +1,74 @@
+
+dekho jo number deya hai uska power nekal ke dena hai isme 2 case hai pahle number ka power positive hai tab to koye dekkat nahi hai tum aaram se for loop use karke kar doge lekin agar power nrgative me hua us case me 
+pahle number ko nn = -nn karte karte uske positive karke thwn uspe loop chala do lekin yad rahe ho 32 bit se bahar na jaye minus minus karte karte isleye tumko long long use karn hai taki wo range se bahar na jaye
+agar jiska power minus me tha jiske hamne posive keya tha usska ans ko 1.0 se / divide kardena lekin isme 1 oe iisue hai jo aab for loop use kar rahe ho bahut bare number me phas raha hai isleye ham loop wala kaam se kuch or change karna pareg 
+TC-> O(LOG N)
+
+class Solution {  // Accected
+public:
+    double myPow(double x, int n) {
+        return pow(x,n);
+    }
+};
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Tc-> O(N)
+
+class Solution {  // Time Limited Exceed dega q ki 2 Billion number hai isleye 
+public:
+    double myPow(double x, int n) {
+        double ans = 1.0;
+
+        long long nn = n;
+
+        if(nn < 0){
+            nn = -nn;
+        }
+
+        for(long long i=1; i<= nn; i++){
+            ans = ans * x;
+        }
+
+        if(n <0){
+            return 1.0 / ans;
+        }
+
+        return ans;
+    }
+};
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TC-> O(log n)
+Yaha pe 2 cse me divide kardo is solution ko even or odd me 
+agar odd hua to jayse kar rahe ho wayse hi karo 
+
+class Solution {
+public:
+    double myPow(double x, int n) {
+        double ans = 1.0;
+
+        long long nn = n;
+
+        if(nn < 0){
+            nn = -nn;
+        }
+
+        // for(long long i=1; i<= nn; i++){
+        //     ans = ans * x;
+        // }
+
+        while(nn > 0){
+            if(nn % 2 == 1){ // odd number hai 
+                ans = ans * x;
+            }
+            x = x * x; // even 
+            nn = nn/2;
+        }
+
+        if(n <0){
+            return 1.0 / ans;
+        }
+
+        return ans;
+    }
+};
