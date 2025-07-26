@@ -1,0 +1,43 @@
+Level-wise jaana hai ⇒ BFS (Breadth First Search)
+DFS (pre/in/post) depth me jata hai; hume breadth/level wise chahiye, so BFS is natural fit.
+BFS = FIFO ⇒ Queue chahiye
+Queue (First In First Out) ensure karta hai ki jo node pehle aya, uske children baad me process honge — exactly level order behavior.
+levelSize = q.size() kyu?
+Jab hum ek level start karte hain, us waqt queue me jitne elements hain, woh sirf isi level ke nodes hain.
+Isliye us count ko leke for loop utne hi nodes process karta hai, aur unke children agla level banate hain.
+Har level ke nodes ko ek temporary vector me daalke result me push karo
+Taaki output [[level1], [level2], ...] format me aaye.
+TC-> O(N)
+SC-> O(N)
+class Solution {
+public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+
+        vector<vector<int>> ans;
+
+        if(root == NULL){
+            return ans;
+        }
+        //lavel order traversal
+        queue<TreeNode*>q;  // (1) Empty tree => empty result
+        q.push(root); // (2) Start BFS from root
+        
+
+        while(!q.empty()){
+            int levelsize = q.size(); // (4) Current level ke nodes ki ginti
+            vector<int>temp; // (5) Is level ke values store karne ke liye
+
+            for(int i=0; i< levelsize; i++){ // (6) Sirf isi level ke nodes process karo
+                TreeNode* node = q.front();
+                q.pop();
+
+                temp.push_back(node->val);  // (7) Current level me store karo
+
+                if(node->left != NULL)q.push(node->left); // (8) Next level ke nodes queue me
+                if(node->right != NULL)q.push(node->right);
+            }
+            ans.push_back(temp); // (9) Ek level complete ho gaya
+        }
+        return ans; // (9) Ek level complete ho gaya
+    }
+};
