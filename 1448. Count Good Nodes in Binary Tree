@@ -1,0 +1,35 @@
+Root se har node tak jaane wale path me, agar kisi node ka value us raste me aayi sabse badi value se barabar ya bada ho, to wo "Good Node" kehlata hai.Aapko tree me total kitne good nodes hain, wo count karna hai.
+Jab hum DFS (depth-first search) traversal karte hain, to har node ke saath ek value carry karte hain – maxSoFar – jo ki root se current node tak aayi sabse badi value hoti hai.
+Har naye node pe check karte hain: 👉 node->val >= maxSoFar → agar haan, to wo Good Node hai
+Start DFS from root with maxSoFar = root->val.
+At each node:
+If node->val >= maxSoFar → it's a Good Node → count++
+Update maxSoFar = max(maxSoFar, node->val)
+Recurse into left & right child with updated maxSoFar
+Total good nodes = self + left subtree + right subtree counts
+
+
+TC-> O(N)
+SC-> O(N)
+class Solution {
+public:
+    int solve(TreeNode*  root, int maxval){
+
+        if(root == NULL){
+            return 0;
+        }
+        int count = 0;
+
+        if(root->val >= maxval){
+            count = 1;
+        }
+        maxval = max(maxval, root->val);
+
+        count = count + solve(root->left, maxval);
+        count = count + solve(root->right, maxval);
+        return count;
+    }
+    int goodNodes(TreeNode* root) {
+       return solve(root, root->val);
+    }
+};
