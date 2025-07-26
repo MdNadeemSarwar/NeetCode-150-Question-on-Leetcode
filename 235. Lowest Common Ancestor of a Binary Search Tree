@@ -1,0 +1,36 @@
+2 alag alag aadmi hai dono ka khandan kaha pe jake melta hai wo batanan hai jaha ape tumdono ka khandan ka baap 1 ho wo batan hai 
+
+Yaad rakho: BST Property
+For any node root:
+Left subtree me saare values < root->val
+Right subtree me saare values > root->val
+
+ Core Intuition – 3 Rules (yeh hi poora solution hai):
+Let curr = root:
+Agar p->val aur q->val dono < curr->val ⇒ LCA left subtree me hoga ⇒ curr = curr->left.
+Agar p->val aur q->val dono > curr->val ⇒ LCA right subtree me hoga ⇒ curr = curr->right.
+Otherwise (ek left me, ek right me ya koi ek curr ke barabar hai) ⇒ curr hi LCA hai.Bas. Isi “split point” ko dhundhna hai.
+
+Tc-> O(h)
+SC-> O(1)
+
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        TreeNode* curr = root;
+
+        while(curr != NULL){
+
+            if(p->val < curr->val && q->val < curr->val){ // Dono left side me hai 
+                curr = curr->left;
+            }
+            else if(p->val > curr->val && q->val > curr->val){// Dono left side me hai 
+                curr = curr->right;
+            }
+            else{ 
+                return curr; // split point
+            }
+        }
+        return NULL;
+    }
+};
