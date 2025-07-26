@@ -1,0 +1,33 @@
+Poora left subtree ke saare nodes root->val se chhote ho
+Poora right subtree ke saare nodes root->val se bade ho
+Har Node ke Saath Valid Range Bhi Pass Karni Chahiye Har node ko ek valid range me hona chahiye:
+Left child: range = (min, node->val)
+Right child: range = (node->val, max)
+Isse hum deep subtree ke nodes ko bhi validate kar sakte hain — na ki sirf immediate child ko.
+Recursion Best Fit Hai – Har Level Par Range Update Kar Sakte Ho Recursion se har node ke liye uska min aur max update kar sakte hain
+Base Case + Range Check → Complete Control on Validation if(node == NULL) return true; → Empty tree = valid BST ✅
+if(node->val <= min || node->val >= max) → Out of range ❌ → Not a BST Agar dono subtree true hain → current node bhi BST ✅
+
+TC-> O(N)
+SC-> O( log n)
+
+class Solution {
+public:
+    bool BST(TreeNode* node, long minval, long maxval){
+
+        if(node == NULL){
+            return true;
+        }
+
+        if((node->val <= minval) || (node->val >= maxval)){
+            return false;
+        }
+
+        return BST(node->left, minval, node->val) && 
+        BST(node->right, node->val, maxval);
+
+    }
+    bool isValidBST(TreeNode* root) {
+        return BST(root, LONG_MIN, LONG_MAX);
+    }
+};
