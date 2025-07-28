@@ -1,0 +1,51 @@
+Q110: Balanced Binary Tree
+
+1. Goal: Har node pe check karna hai ki left & right subtree ka height difference ≤ 1 ho.
+2. Approach: Post-order traversal se har node ka height calculate kiya.
+3. Optimization: Agar kisi subtree me imbalance mila to -1 return karte hain (early exit).
+4. Final check: Agar solve(root) == -1 hai to false, warna true.
+
+abs(height of left subtree - height of right subtree) ≤ 1 Agar ye condition poore tree me har node ke liye satisfy ho gayi, to tree balanced hai ✅
+Humne post-order traversal (Left → Right → Root) use kiya hai taaki: Jab root pe aayein, tab left aur right subtree ka height already mil chuka ho. Tabhi root pe balance check kar paayenge.
+Agar kisi bhi subtree me imbalance milta hai (difference > 1): To hum -1 return karte hain Taaki baaki recursion na chale (early exit)
+Agar solve() ne -1 return kiya → tree not balanced → return false Warna → balanced → return true ✅
+
+
+
+TC-> O(N)
+SC-> O(N)
+
+class Solution {
+public:
+    int solve(TreeNode* root){
+
+        if(root == NULL){
+            return 0;
+        }
+
+        int leftsize = solve(root->left);
+        if(leftsize == -1) return -1;
+        int rightsize = solve(root->right);
+        if(rightsize == -1) return -1;
+
+        if(abs(leftsize - rightsize) > 1) return -1;
+        return max(leftsize, rightsize) + 1;
+        
+    }
+
+    bool isBalanced(TreeNode* root) {
+
+        if(root == NULL){
+            return true;
+        }
+        
+        int ans = solve(root);
+
+        if(ans == -1){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+};
