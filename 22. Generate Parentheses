@@ -1,0 +1,54 @@
+ Problem: Generate all valid parentheses using n pairs
+🔹 Approach: Backtracking with recursion
+🔹 Key Idea: At each step, try adding "(" or ")" under valid constraints
+🔹 Constraints: Don't add ")" unless open > close
+🔹 Base Case: If length == 2n → Push to result
+
+🟢 Rule 1:
+Agar aapke paas opening bracket bacha hai, to
+aap "(" laga sakte ho.
+(jaise darwaza kholna)
+
+🟢 Rule 2:
+Agar aapke paas closing bracket bacha hai
+aur ab tak open brackets zyada hain (yaani darwaze abhi khule hue hain),
+to aap ")" laga sakte ho.
+(jaise darwaza band karna)
+Yani: closing < opening ho tabhi ) laga sakte ho
+
+Ekdam Simplel Condidtion 
+if (open < n) → "(" laga sakte ho  
+if (close < open) → ")" laga sakte ho
+
+          Rule iN Simple 
+Hamare paas n ( aur n ) hote hain
+Jab tak opening brackets bache hain, hum "(" laga sakte hain
+Jab closing < opening ho, tabhi ")" laga sakte hain (warna invalid ban jaayega)
+Jab final string ka length 2n ho jaaye, matlab n pairs lag chuke hain — to us string ko result me daal do ✅
+
+Time Complexity	O(2ⁿ) approx (Catalan based)
+Space Complexity	O(2n + Cₙ × 2n) → depends on output size
+
+class Solution {
+public:
+    void solve(vector<string> &temp, string curr, int open, int close, int n){
+        // base case;
+        if(curr.length() == 2*n){
+            temp.push_back(curr);
+            return;
+        }
+
+        if(open < n){
+            solve(temp, curr + "(", open+1, close, n);
+        }
+
+        if(close < open){
+            solve(temp, curr + ")", open, close+1, n);
+        }
+    }
+    vector<string> generateParenthesis(int n) {
+        vector<string>temp;
+        solve(temp,"", 0, 0, n);
+        return temp;
+    }
+};
