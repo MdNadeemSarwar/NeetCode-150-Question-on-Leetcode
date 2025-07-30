@@ -1,0 +1,46 @@
+solve() check karta hai dono trees (root & subRoot) same hai ya nahi.
+isSubtree() har node pe jaake solve() call karta hai.
+Agar kahi match mil gaya to true return kar dete hain.
+Base case: root == NULL → false return hoga.
+
+isSubtree() har node pe check karta hai: if(solve(root, subRoot)) → kya match karta hai?
+nahi to left ya right subtree me jaata hai solve() dono tree ke node ko check karta hai value match
+left-subtree match 
+right-subtree match
+
+
+TC-> O(M*N)
+SC-> O(H)
+
+class Solution {
+public:
+    bool solve(TreeNode* roots, TreeNode* subroots){   // ✅ Function 1: Ye check karega ki dono tree exact same hain ya nahi
+        if(roots  == NULL && subroots == NULL){  // 💬 Jab dono NULL ho — to obvious hai, same hain
+            return true;
+        }
+
+        if(roots == NULL || subroots == NULL){    // 💬 Agar ek NULL hai aur dusra nahi — to same nahi ho sakte
+            return false;
+        }
+
+        if(roots->val != subroots->val){    // 💬 Agar values hi alag hain — to same nahi hain
+            return false;
+        }
+
+        return solve(roots->left, subroots->left) && solve(roots->right, subroots->right); // 💬 Tabhi same honge agar dono ka left aur right part bhi same ho
+
+    }
+
+    bool isSubtree(TreeNode* root, TreeNode* subRoot) {   // ✅ Function 2: Ye check karega ki subTree, mainRoot ke kisi hisse ka exact match hai ya nahi
+
+        if(root == NULL){  // 💬 Agar mainRoot hi NULL ho gaya — to usme kuch match ho hi nahi sakta
+            return false;
+        }
+
+        if(solve(root, subRoot)) { // agar dono tree same hua to hi true dega  // 💬 Step 1: Kya current node se shuru hone wala tree exact same hai subTree se?
+            return true;
+        }
+
+        return isSubtree(root->left, subRoot) || isSubtree(root->right, subRoot);  // 💬 Step 2: Agar nahi, to left ya right me check karo recursively
+    }
+};
