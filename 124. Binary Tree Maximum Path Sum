@@ -1,0 +1,42 @@
+Hume har node pe ye dekhna hai:
+Left subtree se max path sum kya mil raha hai?
+Right subtree se max path sum kya mil raha hai?
+Fir, check karo kya:
+Left + Node + Right = Max path ban sakta hai? ✅
+Ya Left + Node, ya Node + Right ya just Node hi best h?
+So, har node pe:
+return karna hoga: max(node + left, node + right, node) — ye parent ko dena hai.
+but update karna hoga global max: max(global_max, left + node + right)
+
+TC-> O(N)
+SC-> O(H)
+
+class Solution {
+public:
+    int maxSum = INT_MIN;
+
+    int maxGain(TreeNode* node) {
+        if (!node) return 0;
+        // WHY: null node ka downward gain 0 (kuch contribute nahi karti)
+
+        int leftGain  = max(0, maxGain(node->left));
+        // WHY: left subtree ka best downward path sum lao agar negative hai to 0 le lo (ignore)
+
+        int rightGain = max(0, maxGain(node->right)); // WHY: right ke liye bhi same
+
+        int currMaxPath = node->val + leftGain + rightGain;
+        // WHY: yahin node ko "peak" (turning point) maan ke ek complete split path try karo: left + node + right
+
+        maxSum = max(maxSum, currMaxPath);
+        // WHY: global answer yahin update hoga kyunki ye path, parent ko wapas nahi ja sakta (split ho chuka)
+
+        return node->val + max(leftGain, rightGain);
+        // WHY: parent tak sirf ek taraf ka hi path extend ho sakta hai (linear path constraint) Isliye node + max(left, right).
+    }
+
+    int maxPathSum(TreeNode* root) {
+
+        maxGain(root);      // WHY: DFS karega aur saath-saath maxSum update
+        return maxSum;      // WHY: final global best path sum
+    }
+};
