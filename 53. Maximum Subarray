@@ -1,1 +1,36 @@
 Ek array diya gaya hai (positive & negative integers ke sath), aapko usme se aisa ek continuous subarray (matlab elements ek sath hone chahiye) find karna hai jiska sum maximum ho, aur wo sum return karna hai.
+Input: [-2,1,-3,4,-1,2,1,-5,4] Yeh array me alag-alag jagah pe positive & negative values hain Aapko koi bhi ek continuous subarray lena hai (elements skip nahi kar sakte).
+[4, -1, 2, 1] ka sum = 6, jo ki sabse bada possible sum hai. Isliye Output = 6.
+Example 2: [5, 4, -1, 7, 8] Pure array ka sum hi sabse bada hai: 5+4+(-1)+7+8 = 23
+
+ Kadane's Intuition:
+Ek variable currentSum rakhte hain — ab tak ka best subarray jo yeh position tak jaa raha hai.
+Aur maxSum rakhte hain — ab tak mila sabse bada sum.
+Agar currentSum itna chhota ho gaya ki negative ho gaya, to chhod do usko — naye subarray ki shuruaat karo.
+currentSum → ab tak ka sum, jo ya to grow karega ya reset hoga.
+maxSum → sabse bada sum ab tak ka.
+
+TC-> O(N)
+SC-> O(1)
+
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+      int currsum = nums[0]; // Pehle element se start kar rahe
+      int maxsum = nums[0]; // Pehla element hi ab tak ka max sum
+
+      for(int i=1; i<nums.size(); i++){
+        currsum = max(nums[i],  currsum + nums[i]); // Either continue with previous sum, or start new subarray from current element  // Do choice hai — naye se start karo ya continue karo.   
+        maxsum = max(maxsum, currsum); // Update the maxSum if currentSum is greater
+      } 
+
+      return maxsum;
+    }
+};
+
+Har Line Ka Reason Samjho:
+int currentSum = nums[0];: Pehle element se subarray banana start.
+int maxSum = nums[0];: Maximum sum bhi yahi hai abhi tak.
+Loop: har element se check karte hain ki pichla sum continue karein ya nahi.
+max(nums[i], currentSum + nums[i]): Do choice hai — naye se start karo ya continue karo.
+max(maxSum, currentSum): Best result store rakhte jao.
