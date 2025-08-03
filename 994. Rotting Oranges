@@ -1,0 +1,84 @@
+Yeh question ek classic BFS (Breadth-First Search) problem hai, aur iska intuition "spread" ya "level-wise expansion" ko represent karta hai — jaise fire ya virus phailta hai.
+🔍 Problem ko Simple Words Me Samjho: Tumhe ek grid diya gaya hai jisme:
+0 = khaali cell, 1 = fresh orange, 2 = rotten orange
+Har 1 minute baad, jo fresh orange kisi rotten orange ke 4-directionally (up, down, left, right) paas mein hai, woh bhi rotten ho jaata hai.
+Tumhe batana hai: Kitne minimum minute lagenge sab fresh oranges ko rotten hone mein? Agar kuch fresh orange kabhi rotten nahi ho sakta, toh return -1.
+💡 Intuition:
+Yeh problem multi-source BFS ka perfect example hai Tum rotten oranges se simultaneously BFS start karoge. Har minute ek level hoga, aur us minute mein jitne fresh oranges infected ho sakte hain, unko infect karenge.
+Step 1: Initial Setup
+Queue banao jisme tum sab rotten oranges (2) ke positions daalo. Count karo kitne fresh oranges (1) hain. Ek minutes counter rakho.
+🧠 Tip for Yaad Rakhna:
+BFS = Queue + Level-wise traversal
+directions vector se 4 direction check karte hain
+freshCount jab 0 ho jaye → done
+Har minute = ek level of queue process
+
+Tc-> O(m*n)
+sc-> O(m*n)
+
+class Solution {
+public:
+    int orangesRotting(vector<vector<int>>& grid) {
+
+        int rows = grid.size();
+        int cols = grid[0].size();
+
+        queue<pair<int, int>> rottenQueue;  // Queue for BFS
+        int freshCount = 0;  // Count of fresh oranges
+
+        // Step 1: Count fresh oranges and push rotten ones to queue
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                if (grid[row][col] == 2) {
+                    rottenQueue.push({row, col});  // rotten orange
+                } else if (grid[row][col] == 1) {
+                    freshCount++;  // fresh orange
+                }
+            }
+        }
+
+         // Directions: up, down, left, right
+        vector<pair<int, int>> directions = {
+            {-1, 0},  // up
+            {1, 0},   // down
+            {0, -1},  // left
+            {0, 1}    // right
+        };
+
+        int minutesPassed = 0;
+
+        // Step 2: Start BFS if we have fresh oranges
+        while (!rottenQueue.empty() && freshCount > 0) {
+            int currentLevelSize = rottenQueue.size();
+
+            // Process all rotten oranges at current minute
+            for (int i = 0; i < currentLevelSize; i++) {
+                pair<int, int> current = rottenQueue.front();
+                rottenQueue.pop();
+
+                int currentRow = current.first;
+                int currentCol = current.second;
+
+                // Check all 4 directions
+                for (auto direction : directions) {
+                    int newRow = currentRow + direction.first;
+                    int newCol = currentCol + direction.second;
+
+                    // Valid fresh orange
+                    if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && grid[newRow][newCol] == 1) {
+                        // Make it rotten
+                        grid[newRow][newCol] = 2;
+                        freshCount--;
+                        rottenQueue.push({newRow, newCol});
+                    }
+                }
+            }
+
+            // One minute passed after processing current level
+            minutesPassed++;
+        }
+
+        // If all fresh oranges are rotten, return time. Else, return -1.
+        return (freshCount == 0) ? minutesPassed : -1;
+    }
+};
