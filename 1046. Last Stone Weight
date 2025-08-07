@@ -1,0 +1,29 @@
+Tumhare paas ek array hai of stone weights. Har turn pe, do sabse heavy stones uthao, aur: Agar dono equal ho → dono destroy. Agar unequal ho → chhoti waali destroy ho jaati hai, aur badi waali ka weight ban jaata hai y - x.
+Aisa karte jao jab tak 1 ya 0 stones bachein. Return last stone ka weight (ya 0 agar sab destroy ho jaayein).
+🧠 Intuition: Max Heap
+Hume baar-baar maximum do stones chahiye hote hain. Isliye: Priority Queue (Max Heap) use karenge. Max Heap har time sabse bada element top pe rakhta hai.
+
+TC-> O(n log n)
+SC-> O(n)
+
+class Solution {
+public:
+    int lastStoneWeight(vector<int>& stones) {
+        priority_queue<int>maxheap;
+
+        for(int stone : stones){
+            maxheap.push(stone); // sare stones kp maxheaps me daldo 
+        }
+
+        while(maxheap.size() > 1){
+            int x = maxheap.top(); maxheap.pop(); // 1st heavy stone
+            int y = maxheap.top(); maxheap.pop(); // 2nd heavy stone
+
+            if(x != y){
+                maxheap.push(x-y);
+            }
+            //else agar barabar hua to donp ko chordo  
+        }
+        return maxheap.empty() ? 0 : maxheap.top(); // agar heap khale haito 0 nahi to jo bacha hai heap me wodedeo
+    }
+};
