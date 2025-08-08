@@ -1,0 +1,38 @@
+Aapko ek array diya gaya hai nums[]. Usme kuch bhi numbers ho sakte hain (unordered, duplicate bhi ho sakte hain). Aapko ye batana hai ki us array me longest consecutive sequence ki length kya hai.
+Consecutive" ka matlab hota hai — lagataar chalne wale numbers, bina gap ke.
+✅ Idea: Brute Force Approach (Slow but simple)
+Sort the array / Traverse the array and count length of current streak / Keep track of max streak length
+
+currentStreak Purpose: Ye store karta hai ki abhi hum jo consecutive numbers dekh rahe hain, wo kitne lambi sequence me chal rahe hain.
+Jab hum sequence ka start karte hain (koi number se shuru hote hain), hum minimum 1 maan ke chalte hain, kyunki ek number khud hi length = 1 hota hai.
+longest Purpose: Ye store karta hai ki ab tak hume mila sabse bada streak kitna hai. / Har time jab sequence toot jata hai, hum:
+
+Sorted: [1, 2, 3, 4, 100]
+
+i = 1 → nums[1] = 2, nums[0] = 1  
+Check: 2 == 1 + 1 ✅ → consecutive → currentStreak++
+
+i = 2 → nums[2] = 3, nums[1] = 2  
+Check: 3 == 2 + 1 ✅ → consecutive → currentStreak++
+
+i = 4 → nums[4] = 100, nums[3] = 4  
+Check: 100 == 4 + 1 ❌ → not consecutive → streak break
+
+TC = O(n log n)
+SC = O(1)
+sort(nums.begin(), nums.end()); // e.g. [1, 2, 3, 4, 100]
+int longest = 1;
+int currentStreak = 1;
+
+for (int i = 1; i < nums.size(); i++) {
+    if (nums[i] == nums[i - 1]) continue; // duplicates ignore
+
+    if (nums[i] == nums[i - 1] + 1) {  // consecutive check
+        currentStreak++;               // increase streak
+    } else {
+        longest = max(longest, currentStreak); // update max streak
+        currentStreak = 1;                     // reset streak
+    }
+}
+
+return max(longest, currentStreak); // last streak bhi compare
