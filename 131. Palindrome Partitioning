@@ -1,0 +1,62 @@
+Tumhe ek string s di gayi hai, aur tumhe saare possible ways return karne hain jisme: / Tum string ko substrings me todoge / Har ek substring palindrome hona chahiye
+Possible partitions: "a" | "a" | "b" / sab palindromes ✅ "aa" | "b" / "aa" palindrome ✅, "b" palindrome ✅
+Yeh ek backtracking problem hai, kyunki: Tumhe saare possible ways explore karne padenge / Har position pe tum decide karte ho: / Yaha cut karo / Ya thoda aur aage jao
+
+💡 Approach:
+Start index = 0
+Har possible end index ke liye check karo ki substring palindrome hai ya nahi
+Agar palindrome hai → usko current path me daalo → aage ke liye recursive call
+Jab end of string aa jaaye → current path ko result me daal do
+
+Brute Force soch
+Har jagah cut lagao (har index pe decision)
+Har substring palindrome hai ya nahi check karo
+Isme kaafi extra checks honge, lekin backtracking naturally eliminate karega jo palindrome nahi hain
+
+Step 1: Start from index 0
+Try "a" → palindrome ✅ → path = ["a"] → move to index 1
+Try "a" (index 1) → palindrome ✅ → path = ["a","a"] → move to index 2
+Try "b" (index 2) → palindrome ✅ → path = ["a","a","b"] → end reached → save path
+Try "ab" → not palindrome ❌ → skip
+Try "aa" (index 0 to 1) → palindrome ✅ → path = ["aa"] → move to index 2
+Try "b" → palindrome ✅ → path = ["aa","b"] → end reached → save path
+Try "aab" → not palindrome ❌
+✅ Result: [["a","a","b"], ["aa","b"]]
+
+TC≈O(n⋅2)
+SC= O(n)
+
+class Solution {
+public:
+    vector<string>temp;
+    vector<vector<string>>ans;
+    bool ispalindrome(string &s, int left, int right){
+        while(left < right){
+            if(s[left] != s[right]){
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
+
+    void solve(int start, string &s){
+        if(start == s.size()){
+            ans.push_back(temp);
+            return;
+        }
+
+        for(int i = start; i<s.size(); i++){
+            if(ispalindrome(s, start, i)){
+                temp.push_back(s.substr(start, i - start + 1));
+                solve(i+1, s);
+                temp.pop_back();
+            }
+        }
+    }
+    vector<vector<string>> partition(string s) {
+        solve(0, s);
+        return ans;
+    }
+};
