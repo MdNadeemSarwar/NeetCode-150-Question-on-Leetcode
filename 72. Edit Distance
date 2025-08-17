@@ -1,0 +1,57 @@
+Tumhe word1 ko word2 me convert karna hai minimum operations se.
+Allowed operations: Insert Delete Replace
+
+2. Subproblem Definition dp[i][j] = minimum operations required to convert 👉 first i characters of word1 → first j characters of word2.
+
+3. Base Cases Agar word1 empty hai (i == 0):
+To answer = j (kyunki j insert karne padenge).
+
+Agar word2 empty hai (j == 0):
+To answer = i (kyunki i deletes karne padenge).
+4. Recurrence Relation Agar word1[i-1] == word2[j-1]: Last character same hai → kuch karna nahi hai → dp[i][j] = dp[i-1][j-1]
+Agar different hai → 3 options:
+Insert → dp[i][j-1]
+Delete → dp[i-1][j]
+Replace → dp[i-1][j-1] 
+Isme se minimum + 1 (kyunki ek operation hua).
+
+TC = O(m * n)
+SC = O(m * n)
+
+class Solution {
+public:
+    int mindistancehelper(string& word1, string& word2, vector<vector<int>> & dp, int i, int j){
+        if(dp[i][j] != -1){
+            return dp[i][j];
+        }
+
+        // base case agar 1st word khale hua to 2nd words ka length ke itne kara parega operation
+        if(i == 0){
+            dp[i][j] = j;
+            return j;
+        }
+        // base case agar 2ndt word khale hua to 1nd words ka length ke itne kara parega operation
+        if(j == 0){
+            dp[i][j] = i;
+            return i;
+        }
+
+        if(word1[i - 1] == word2[j - 1]){
+            dp[i][j] = mindistancehelper(word1, word2, dp, i-1, j-1);
+        }
+        else{
+            int insertop = mindistancehelper(word1, word2, dp, i, j-1);
+            int deleteop = mindistancehelper(word1, word2, dp, i-1, j);
+            int replaceop = mindistancehelper(word1, word2, dp, i-1, j-1);
+            dp[i][j]  = 1+ min({insertop, deleteop, replaceop});
+        }
+        return dp[i][j];
+    }
+    
+    int minDistance(string word1, string word2) {
+
+       int m = word1.size(), n = word2.size();
+       vector<vector<int>> dp(m+1, vector<int>(n+1, -1));
+       return mindistancehelper(word1, word2, dp, m, n); 
+    }
+};              
