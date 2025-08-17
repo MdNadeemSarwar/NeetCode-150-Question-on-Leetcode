@@ -1,0 +1,41 @@
+Problem Samajhna
+Ek robot grid[0][0] (top-left) se start karta hai.
+Target hai grid[m-1][n-1] (bottom-right).
+Robot sirf Right (→) ya Down (↓) move kar sakta hai.
+Hume kitne unique paths ban sakte hain ye count karna hai.
+
+// 1. Out of bounds check
+// 2. Destination check
+// 3. Already computed?
+// 4. Explore right & down
+
+Time Complexity: O(m*n) (har cell ek hi baar compute hoga).
+Space Complexity: O(m*n) (DP table) + O(m+n) (recursion stack).
+
+class Solution {
+public:
+    vector<vector<int>> t; // memoization table
+
+    int solve(int i, int j, int m, int n){
+
+        if(i<0 || i>= m || j<0 || j>= n){ // out of bounds
+            return 0;
+        }
+
+        if(i == m-1 && j == n-1){   // destination reached
+            return 1;
+        }
+
+        if(t[i][j] != -1) return t[i][j];
+ 
+        // move right and down
+        int right = solve(i, j+1, m, n);
+        int down = solve(i+1, j, m, n);
+
+        return t[i][j] = right + down; 
+    }
+    int uniquePaths(int m, int n) {
+        t.assign(m, vector<int>(n, -1)); // initialize with -1
+        return solve(0, 0, m, n);
+    }
+};
