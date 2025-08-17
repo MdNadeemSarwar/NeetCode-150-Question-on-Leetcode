@@ -1,0 +1,59 @@
+Ek 9x9 Sudoku board diya hai. Hume check karna hai ki valid hai ya nahi.
+Valid ka matlab: Har row me numbers 1-9 repeat nahi hone chahiye.
+Har column me numbers 1-9 repeat nahi hone chahiye.
+Har 3x3 sub-box me numbers 1-9 repeat nahi hone chahiye.
+Empty cell ko "." se represent kiya gaya hai, usko ignore karna hai.
+
+🔹 vector<unordered_set<char>> rows(9), cols(9), boxes(9); Har row, column, aur 3x3 box ke liye ek set banaya hai.
+Set duplicate allow nahi karta, isliye ye perfect hai check karne ke liye ki number repeat toh nahi ho raha.
+🔹 for (int r = 0; r < 9; r++) Har row ko traverse karna start kiya.
+🔹 for (int c = 0; c < 9; c++) Har column bhi traverse hoga (matlab har cell).
+🔹 char num = board[r][c]; Current cell ka value nikala.
+🔹 if (num == '.') continue; Agar cell empty hai (dot), toh skip kar do, kyunki usse validation pe koi farq nahi padta.
+🔹 int boxIndex = (r / 3) * 3 + (c / 3); Ye magic line hai jo decide karti hai ki current cell kaunsa 3x3 box me aata hai.
+
+Example:
+(0,0) → box 0
+(4,5) → box 4
+(8,7) → box 8
+
+🔹 if (rows[r].count(num) || cols[c].count(num) || boxes[boxIndex].count(num)) return false; Agar number already us row, column, ya box me hai → Sudoku invalid.
+.count(num) check karta hai ki num set me hai ya nahi.
+🔹 rows[r].insert(num);
+🔹 cols[c].insert(num);
+🔹 boxes[boxIndex].insert(num);
+
+Agar duplicate nahi mila toh number ko row, column, aur box ke set me daal do. Matlab “ab yeh number is row/col/box me aa gaya hai”.
+🔹 return true; Agar pura board scan ho gaya aur koi duplicate nahi mila → Sudoku valid hai ✅
+
+Time Complexity: O(1) (81 cells check karna fix hai)
+Space Complexity: O(1) (27 sets, each ≤ 9 elements fix hai)
+
+class Solution {
+public:
+    bool isValidSudoku(vector<vector<char>>& board) {
+        // 9 rows, 9 cols, 9 boxes ke liye sets banate hain
+        vector<unordered_set<char>> rows(9), cols(9), boxes(9); 
+
+        for(int r = 0; r<9; r++){
+            for(int c = 0; c<9; c++){
+                char num = board[r][c];
+
+                if(num == '.'){  // Agar cell empty hai (.)
+                    continue;
+                }
+
+                int boxindex = (r/3) * 3 + (c / 3);  // Box index nikalna (important trick)
+                if(rows[r].count(num) || cols[c].count(num) || boxes[boxindex].count(num)){
+                    return false; // Duplicate mila → invalid
+                }
+                
+                // Insert kar dete hain set me (mark as visited)
+                rows[r].insert(num);
+                cols[c].insert(num);
+                boxes[boxindex].insert(num);
+            }
+        }
+        return true; // Agar kahin duplicate nahi mila → valid
+    }
+};
