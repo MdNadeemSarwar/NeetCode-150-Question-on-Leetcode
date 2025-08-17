@@ -1,0 +1,75 @@
+Aapko ek m x n matrix diya gaya hai. Agar kisi bhi cell me 0 hai, to us row aur column ke sabhi elements ko 0 banana hai. Ye kaam in-place karna hai (matlab naya matrix allocate nahi karna).
+Agar hum direct traverse karke row/column zero kar denge, to baaki cells galat update ho jayenge.
+Isliye ek marker system use karenge:
+Pehli row aur pehla column ko marker ke liye use karenge.
+Agar kisi cell (i, j) me 0 hai, to matrix[i][0] = 0 aur matrix[0][j] = 0 kar denge.
+Phir dobara matrix traverse karenge aur jahan row/column marker 0 hoga, wahan pura cell 0 kar denge.
+Last me check karenge ki pehli row aur pehla column khud zero karna hai ya nahi.
+
+Step 1: Pehle check karo kya first row aur first column me khud koi 0 hai? kyunki hum inhe marker ki tarah use karenge. Agar pehle se 0 hai to us info ko alag variable me store karte hain (row0, col0 flag).
+
+Step 2: Traverse (matrix[1..m][1..n]) aur agar matrix[i][j] == 0 hai: matrix[i][0] = 0 (apne row ka marker bana diya) matrix[0][j] = 0 (apne column ka marker bana diya)
+
+Step 3: Ab second pass karte hain (matrix[1..m][1..n]): Agar us row ka marker matrix[i][0] == 0 hai ya us column ka marker matrix[0][j] == 0 hai,
+➡️ to matrix[i][j] = 0 kar do.
+Ye hi hai Step 4: Update cells using markers Step 4: Ab bachi hui first row handle karo: agar pehle row0 == true tha (matlab first row me kabhi 0 aaya tha),
+➡️ to puri first row ko 0 kar do. Ye hi hai Step 5: Update first row Step 5: Ab bachi hui first column handle karo: Agar pehle col0 == true tha (matlab first column me kabhi 0 aaya tha),
+➡️ to puri first column ko 0 kar do.Ye hi hai Step 6: Update first column
+
+Time Complexity: O(m * n)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    void setZeroes(vector<vector<int>>& matrix) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+
+        bool firstrow = false, firstcol = false;
+        //step 1 check first row has zero 
+        for(int j = 0; j<n; j++){
+            if(matrix[0][j] == 0){
+                firstrow = true;
+                break;
+            }
+        }
+        
+        // Step 2: Check if first column has zero
+        for(int i= 0; i<m; i++){
+            if(matrix[i][0] == 0){
+                firstcol = true;
+                break;
+            }
+        }
+
+        // Step 3: Use first row & column as markers
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+
+        // Step 4: Update cells using markers
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+
+        // Step 5: Update first row
+        if (firstrow) {
+            for (int j = 0; j < n; j++) matrix[0][j] = 0;
+        }
+
+        // Step 6: Update first column
+        if (firstcol) {
+            for (int i = 0; i < m; i++) matrix[i][0] = 0;
+        }
+
+    }
+};
