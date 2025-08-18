@@ -1,0 +1,57 @@
+nums = [2,3,1,1,4]
+Index 0 par nums[0] = 2 → yaha se aap max 2 step aage ja sakte ho → possible destinations: index 1 ya index 2.
+
+🔑 Intuition in 5 Steps
+Jump ka matlab window cover karna hai
+Har nums[i] ek range (window) batata hai ki yaha se aap maximum kaha tak ja sakte ho. Matlab hum ek-ek karke jump na sochke, ek pura window of reach sochte hain.
+
+Window = ek jump ki power
+Jaise hi hum ek jump maarte hain, hum decide karte hain ki “is jump se mai max kaha tak pahunch sakta hoon?”
+Ye hi window hoti hai → start … end.
+
+Greedy choice: max reach dhoondho
+Har step pe hum check karte hain: “abhi ki window me se mai sabse door kaha tak ja sakta hoon?”
+Ye maintain karne ke liye hum ek variable rakhte hain: maxReach.
+
+Jab window khatam hota hai → ek jump count
+Agar hum current index end tak pahunch gaye → iska matlab hai ki hum ek jump complete kar chuke hain.
+Ab hum window ko update kar dete hain: end = maxReach.
+
+Repeat until last index
+Aise hi hum window-update karte hue chalte hain, aur jaise hi hum last index ke andar aa jaate hain, answer mil jaata hai → minimum jumps.
+
+Sliding Window kyun? (Greedy reasoning) Ye problem Greedy + Sliding Window ka mixture hai.
+Sliding Window: -> Har jump ek window (range of indices) define karta hai jisme hum chal sakte hain. Window khatam hote hi hume jump count badhana padta hai.
+Greedy:-> Har step me hum sabse door tak pahunchne ki koshish karte hain (maxReach). Matlab hum future ka best option pehle se decide karte hain.
+
+🧠 Easy Memory Trick (Always Yaad Rahe) Socho:
+Window → “Abhi is jump me kahan tak ja sakta hoon.
+End → “Ye current window ka last stop hai.
+Jab end aa jaye → jump lena padega, aur nayi window set hogi.
+
+Time: O(n) (har index ek baar process)
+Space: O(1) (sirf 3 variables: jumps, end, window)
+
+class Solution {
+public:
+    int jump(vector<int>& nums) {
+         int n = nums.size();
+        if (n <= 1) return 0;   // already at last index
+
+        int jumps = 0;          // total jumps count
+        int end = 0;            // current window ka end
+        int window = 0;         // next jump se max reachable index
+
+        for (int i = 0; i < n - 1; i++) {
+            // line 1: calculate how far we can reach in this window
+            window = max(window, i + nums[i]);
+
+            // line 2: if we reached end of current window
+            if (i == end) {
+                jumps++;        // line 3: ek jump karna hi padega
+                end = window;   // line 4: window ko extend kar do
+            }
+        }
+        return jumps;
+    }
+};
