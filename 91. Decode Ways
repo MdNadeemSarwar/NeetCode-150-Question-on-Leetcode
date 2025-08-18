@@ -1,0 +1,104 @@
+Tumhe ek string of digits di gayi hai (jaise "12", "226", "11106").
+Ye digits ek secret message represent karte hain. Har digit ya pair of digits ek letter banata hai:
+"1" → A
+"2" → B
+"26" → Z
+Matlab, message ko decode karne ke liye tum digits ko groups me tod sakte ho — ek ek karke ya do do karke — lekin rules ka dhyaan rakhna hai.
+
+⚠️ Important Rules
+Single digit valid hai agar wo '1' se '9' ke beech ho.
+"0" apne aap me invalid hai.
+Example: "06" ❌ (invalid), "6" ✔️ (valid).
+Do digit number valid hai agar wo "10" se "26" ke beech ho.
+Example: "10" ✔️ (J), "26" ✔️ (Z), "27" ❌ (invalid).
+
+Example 1: "12"
+"1" "2" → "A" "B" → "AB"
+"12" → "L"
+👉 2 ways.
+
+Sochne ka tareeqa
+Har position pe do choices hoti hain:
+Kya is digit ko ek single letter maan sakte ho? (agar valid hai)
+Kya is digit ko pichhli digit ke saath jod ke ek 2-digit letter bana sakte ho? (agar valid hai)
+Aur tumhe count karna hai ki poori string kitne valid tariko se decode ho sakti hai.
+
+Base case kyun?
+
+dp[i] = ways to decode s[i..end].
+Isliye dp[n] = 1: jab string khatam ho gayi (empty suffix), usko decode karne ka 1 valid tareeqa hota hai—“kuch na karna”.
+
+Loop ulta kyon?
+dp[i] ko dp[i+1] aur dp[i+2] chahiye.
+Right-to-left chalenge to ye dono values pehle se ready milti hain.
+Dry run on "11106"
+
+Initial:
+s = 1 1 1 0 6 (indices 0..4)
+dp = [?, ?, ?, ?, ?, 1]
+
+i = 4 (char = '6')
+s[4] != '0' ⇒ else-branch
+1-digit: dp[4] = dp[5] = 1
+2-digit: i+1<n? (5<5 false) ⇒ skip
+dp = [?, ?, ?, ?, 1, 1]
+
+i = 3 (char = '0')
+
+s[3] == '0' ⇒ if-branch
+dp[3] = 0 (koi decoding yaha se start nahi)
+dp = [?, ?, ?, 0, 1, 1]
+
+i = 2 (char = '1')
+s[2] != '0' ⇒ else-branch
+1-digit: dp[2] = dp[3] = 0
+2-digit check: i+1<n (3<5) & (s[2]=='1') ✅
+⇒ dp[2] += dp[4] ⇒ 0 + 1 = 1
+dp = [?, ?, 1, 0, 1, 1]
+
+i = 1 (char = '1')
+s[1] != '0'
+1-digit: dp[1] = dp[2] = 1
+2-digit: i+1<n & (s[1]=='1') ✅
+⇒ dp[1] += dp[3] ⇒ 1 + 0 = 1
+dp = [?, 1, 1, 0, 1, 1]
+
+i = 0 (char = '1')
+s[0] != '0'
+1-digit: dp[0] = dp[1] = 1
+2-digit: i+1<n & (s[0]=='1') ✅
+⇒ dp[0] += dp[2] ⇒ 1 + 1 = 2
+
+dp = [2, 1, 1, 0, 1, 1]
+
+Answer = dp[0] = 2
+(Valid groupings: (1,1,10,6) → “AAJF”, (11,10,6) → “KJF”)
+Checks exactly kahaan hue?
+Single-digit valid (1..9): if (s[i] == '0') dp[i]=0; else dp[i]=dp[i+1];
+
+Two-digit valid (10..26):
+if (i+1<n && (s[i]=='1' || (s[i]=='2' && s[i+1]<='6'))) dp[i]+=dp[i+2];
+
+TC = O(n)
+SC = O(n)
+class Solution {
+public:
+    int numDecodings(string s) {
+int n = s.size();                 // n = 5
+vector<int> dp(n+1, 0);           // dp size = 6  -> dp[0..5]
+dp[n] = 1;                        // dp[5] = 1  (empty string = 1 way)
+
+for (int i = n-1; i >= 0; i--) {  // i = 4,3,2,1,0
+    if (s[i] == '0') {
+        dp[i] = 0;                // "0" se start invalid
+    } else {
+        dp[i] = dp[i+1];          // 1-digit lena
+        if (i+1 < n &&            // 2-digit lena (10..26)
+            (s[i] == '1' || (s[i] == '2' && s[i+1] <= '6'))) {
+            dp[i] += dp[i+2];
+        }
+    }
+}
+return dp[0];
+    }
+};
