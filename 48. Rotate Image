@@ -1,0 +1,39 @@
+Hume matrix ko 90° clockwise rotate karna hai, aur in-place (extra matrix banake nahi kar sakte).
+Socho tumhare paas ek square hai, tum clockwise ghumate ho → iska matlab row → column me convert ho raha hai.
+Concept (2 Steps) Is problem ko solve karne ka standard trick hai:
+Transpose karo matrix ->  Matlab matrix[i][j] ko matrix[j][i] se swap kar do (bas diagonal ke upar/neeche ka part swap hota hai).
+Example:
+1 2 3        1 4 7
+4 5 6   →    2 5 8
+7 8 9        3 6 9
+
+Har row ko reverse kar do Matlab row ke elements ulte kar do.
+Example:
+1 4 7        7 4 1
+2 5 8   →    8 5 2
+3 6 9        9 6 3
+
+Aur yahi tumhara rotated matrix hai 🎉.
+🧠 Key Concept Tumhe Yaad Rakhna Hai
+Transpose = diagonal ke across swap karo.
+Reverse row = bas ulta kar do. Ye 2 step ka “magic trick” hai → 90° clockwise rotation.
+
+Time: O(n²) (kyunki hume saare elements touch karne padenge transpose + reverse ke liye).
+Space: O(1) (in-place ho raha hai, koi extra matrix nahi banayi).
+
+class Solution {
+public:
+    void rotate(vector<vector<int>>& matrix) {
+       int n = matrix.size();
+        // Step 1: Transpose yani swap kardo 
+       for(int i=0; i<n; i++){
+            for(int j = i+1; j<n; j++){
+                swap(matrix[i][j], matrix[j][i]);
+            }
+       }
+        // Step 2: Reverse kardo sare row ko 
+       for(int i=0; i<n; i++){
+        reverse(matrix[i].begin(), matrix[i].end());
+       } 
+    }
+};
