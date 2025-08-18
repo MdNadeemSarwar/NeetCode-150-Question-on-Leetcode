@@ -1,0 +1,42 @@
+Tumhe ek circular route diya gaya hai jisme:
+gas[i] → station i pe jitna petrol milta hai
+cost[i] → station i se next station tak jaane ke liye kitna petrol chahiye
+Tumhe check karna hai:
+👉 Kya koi aisa starting station index hai jahan se shuru karke pura circle cover kar sakte ho bina petrol negative hue? Agar haan, toh us station ka index return karo. Nahi toh -1
+
+INTUTUIN ---> Greedy
+Total check → Agar total gas < total cost → full circle possible hi nahi → return -1.
+Traverse karte jao → Har station pe total += gas[i] - cost[i].
+Reset condition → Agar total < 0 ho gaya, iska matlab ye starting point se circle complete nahi ho sakta → next station ko new start maan lo (resultindex = i+1), aur total = 0.
+Answer → Loop ke baad resultindex wahi hoga jahan se circle complete ho sakta hai.
+
+
+TC-> O(N)
+SC-> O(1)
+ye STL hai iska tc o(n) hai accumulate ye pure array ka sum nekalte hai 
+
+class Solution {
+public:
+    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+
+        int n = gas.size();
+        int totalkamai = accumulate(begin(gas), end(gas), 0); // total sum gas ka 
+        int totalkharch = accumulate(begin(cost), end(cost), 0); // total sum cost ka
+
+        if(totalkamai < totalkharch){
+            return -1;
+        }
+        int resultindex= 0;
+        int total = 0;
+
+        for(int i=0 ; i<n; i++){
+            total = total + gas[i] - cost[i];
+
+            if(total < 0){
+                resultindex = i + 1;
+                total = 0;
+            }
+        }
+        return resultindex;
+    }
+};
