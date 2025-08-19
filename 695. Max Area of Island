@@ -1,0 +1,56 @@
+📌 Question Kya Keh Raha Hai?
+Tumhe ek m x n binary grid diya hai:
+1 → land (zameen)
+0 → water (paani)
+Ek island = continuous 1s jo upar, neeche, left, right (4-direction) se connected ho.
+Tumhe maximum area of island nikalna hai.
+Area = island me kitne 1 cells hain.
+Agar koi island nahi hai → return 0.
+
+📌 Logic
+Ye typical DFS/BFS flood fill problem hai.
+Har cell traverse karo.
+Agar grid[i][j] == 1 → matlab ek naya island mila.
+DFS/BFS chalao uske saare connected 1s ko count karne ke liye.
+Ek area variable rakho jo island ka size count karega.
+Har visited 1 ko 0 kar do (taaki dobara count na ho).
+Har island ka area nikalke maxArea update karte jao.
+Final answer = maxArea.
+
+Matlab ek cell pe aate hi:
+Apne aap ko count karega (area = 1)
+Fir charo sides (down, up, right, left) check karega.
+Agar waha land (1) mila → waha chala jayega → fir uske neighbors explore honge → aur area add hota rahega.
+Agar water ya boundary ya visited cell mila → 0 return karega (kuch add nahi hoga).
+
+Time Complexity: O(m * n) (har cell ek hi baar visit hoga)
+Space Complexity: O(m * n) (DFS stack recursion worst case me itna ho sakta hai)
+
+class Solution {
+public:
+    int dfs(vector<vector<int>>& grid, int i, int j){
+        if(i<0 || j<0 || i >= grid.size() || j >= grid[0].size() || grid[i][j] == 0){
+            return 0;
+        }
+        grid[i][j] = 0; // mark as visited
+        int area = 1;
+        // explore in 4 direction 
+        area = area + dfs(grid, i+1, j);
+        area = area + dfs(grid, i-1, j);
+        area = area + dfs(grid, i, j+1);
+        area = area + dfs(grid, i, j-1);
+        return area;
+    }
+    int maxAreaOfIsland(vector<vector<int>>& grid) {
+            int maxarea = 0;
+        for(int i = 0; i<grid.size(); i++){
+            for(int j = 0; j<grid[0].size(); j++){
+                if(grid[i][j] == 1){
+                    maxarea = max(maxarea, dfs(grid, i, j));
+                }
+
+            }
+        }
+        return maxarea;
+    }
+};
