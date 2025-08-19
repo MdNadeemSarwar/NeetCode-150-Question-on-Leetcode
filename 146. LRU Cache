@@ -1,0 +1,124 @@
+Hume ek Cache (ek type ka temporary storage) banana hai jo Least Recently Used (LRU) principle follow kare.
+Cache ka capacity fixed hai (jitne elements rakh sakta hai).
+Agar cache full ho gaya aur aap ek naya element insert karna chahte ho, to jo sabse purana (least recently used) element hai use hataana padega.
+
+Operations:
+get(key):
+Agar key cache me hai → uska value return karo aur use recently used mark karo.
+Agar nahi hai → -1 return karo.
+
+put(key, value):
+Agar key already hai → value update karo aur use recently used mark karo.
+Agar key new hai aur cache full hai → sabse purana wala (least recently used) remove karo, fir naya key-value daal do.
+Har operation (get aur put) ko O(1) me karna hai (bahut fast)
+
+🔹 Example Samjhna
+Capacity = 2
+Operations:
+LRUCache lRUCache = new LRUCache(2);
+lRUCache.put(1, 1);   // cache = {1=1}
+lRUCache.put(2, 2);   // cache = {1=1, 2=2}
+lRUCache.get(1);      // return 1, cache order = {2=2, 1=1} (1 recent ho gaya)
+lRUCache.put(3, 3);   // cache full tha, LRU = key=2 remove, ab cache = {1=1, 3=3}
+lRUCache.get(2);      // return -1 (kyunki 2 delete ho gaya)
+lRUCache.put(4, 4);   // cache full tha, LRU = key=1 remove, ab cache = {3=3, 4=4}
+lRUCache.get(1);      // return -1 (kyunki 1 delete ho gaya)
+lRUCache.get(3);      // return 3 (present hai)
+lRUCache.get(4);      // return 4 (present hai)
+
+🔹 Dry Run Step by Step
+Capacity = 2
+put(1,1) → cache = {1=1}
+put(2,2) → cache = {1=1, 2=2}
+get(1) → return 1 ✅, ab 1 ko recent mark karna hai → cache order = {2=2, 1=1}
+put(3,3) → cache full hai, LRU = 2, use hatao → cache = {1=1, 3=3}
+get(2) → return -1 ❌ (2 already removed)
+put(4,4) → cache full hai, LRU = 1, use hatao → cache = {3=3, 4=4}
+get(1) → return -1 ❌
+get(3) → return 3 ✅
+get(4) → return 4 ✅
+
+🔹 Intuition
+Cache ek list ki tarah hai jisme front = recently used, back = least used.
+Jab bhi koi key use hoti hai (get/put), usse front me le aate hain.
+Jab cache full hota hai, back se ek node remove kar dete hain.
+
+
+class LRUCache {
+public:
+ // Doubly Linked List ka node
+    struct Node {
+        int key, value;
+        Node* prev;
+        Node* next;
+        Node(int k, int v) : key(k), value(v), prev(NULL), next(NULL) {}
+    };
+
+    int capacity;
+    unordered_map<int, Node*> mp; // key -> Node pointer
+    Node* head; // dummy head
+    Node* tail; // dummy tail
+
+    LRUCache(int capacity) {
+      this->capacity = capacity;
+        head = new Node(0, 0);
+        tail = new Node(0, 0);
+        head->next = tail;
+        tail->prev = head;  
+    }
+
+    // helper: node ko list se remove karna
+    void remove(Node* node) {
+        Node* prevNode = node->prev;
+        Node* nextNode = node->next;
+        prevNode->next = nextNode;
+        nextNode->prev = prevNode;
+    }
+
+    // helper: node ko head ke baad insert karna (most recently used)
+    void insert(Node* node) {
+        Node* nextNode = head->next;
+        head->next = node;
+        node->prev = head;
+        node->next = nextNode;
+        nextNode->prev = node;
+    }
+    
+
+    int get(int key) {
+        if(mp.find(key) == mp.end()) return -1;
+
+        Node* node = mp[key];
+        remove(node);    // purani jagah se hatao
+        insert(node);    // head ke baad daal do (recently used)
+        return node->value;
+    }
+
+    void put(int key, int value) {
+        if(mp.find(key) != mp.end()) {
+            // agar key already hai -> remove old
+            Node* node = mp[key];
+            remove(node);
+            delete node; // memory free
+            mp.erase(key);
+        }
+
+        if(mp.size() == capacity) {
+            // capacity full -> LRU delete karo (tail->prev)
+            Node* lru = tail->prev;
+            remove(lru);
+            mp.erase(lru->key);
+            delete lru;
+        }
+
+        Node* newNode = new Node(key, value);
+        insert(newNode);
+        mp[key] = newNode;
+    }
+};
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache* obj = new LRUCache(capacity);
+ * int param_1 = obj->get(key);
+ * obj->put(key,value);
+ */
