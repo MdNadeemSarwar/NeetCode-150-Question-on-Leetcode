@@ -1,0 +1,35 @@
+Tumhare paas ek sorted array hai jo rotate ho gaya hai.
+Example: [0,1,2,4,5,6,7] ko agar rotate karo to banega → [4,5,6,7,0,1,2]
+Tumhe sirf minimum element dhoondhna hai.
+Example: [3,4,5,1,2] → min = 1 | Example: [11,13,15,17] → min = 11
+Condition: tumhe O(log n) me karna hai. Matlab linear search (O(n)) se kaam nahi chalega.
+Binary Search lagana padega Logic (Binary Search se)
+
+Socho array ko rotate karne par kya hota hai: Ek sorted half hamesha milegi.
+Minimum element wahi jagah hoga jahan se rotation start hua hai (pivot).
+Ab binary search lagate hain: Agar nums[mid] > nums[right] → iska matlab min right half me hai → left = mid + 1.
+Warna → min left half me hai (mid included) → right = mid. Loop tab tak chalega jab left < right. End me nums[left] hi answer hoga.
+
+Time Complexity: O(log n) (binary search hai)
+Space Complexity: O(1) (extra memory nahi lagti)
+
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int left = 0, right = nums.size() - 1;
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+
+            // agar mid ka element right se bada hai → min right half me hoga
+            if (nums[mid] > nums[right]) {
+                left = mid + 1;
+            } 
+            // warna → min left half me hoga (mid included)
+            else {
+                right = mid;
+            }
+        }
+        return nums[left]; // ya nums[right], dono same hoga
+    }
+};
