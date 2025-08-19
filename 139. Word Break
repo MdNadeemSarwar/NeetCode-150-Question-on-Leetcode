@@ -1,0 +1,38 @@
+is question me 1 string deya hua hai or 1 dicnory deya hua hai hame kya karna hai ki string ko tor torke us dicnory ke word ke sath match karna hai agar pra match hogaya to true de do 
+nahi to false de do to ham kya kar raha hai ham recursivily string ka pahle 1st lengt ka sub string lwkw check akr raha hai agar match hua to thik nahi to 2 lenght ka substring le rah hai 
+nahi to 3length ka substring ayse hi karke karke har substring ko check karna hai 1 by 1 or recurssion se solve ho jayega lekin TLE marne ka chance hai isleye meomization kardo 
+
+Tc-> o(n2)
+sc-> o(1)
+
+class Solution {
+public:
+    unordered_set<string> st;
+    int n;
+    vector<int>dp; // initialize dp with -1
+
+    bool solve(int index, string & s){
+        if(index == n){
+            return true;
+        }
+        if(dp[index] != -1) return dp[index]; // memo check
+
+        for(int len = 1; len <= n - index; len++){
+
+            string temp = s.substr(index, len);
+            if(st.find(temp) != st.end() && solve(index + len, s)){
+                return dp[index] = true;
+            }
+        }
+        return dp[index] = false;
+    }
+    bool wordBreak(string s, vector<string>& wordDict) {
+        n = s.length();
+        dp.assign(n, -1);
+// bar bar is vector me joage acces karna to o(n) tim lagega isleye hamne pahle hi isko unorderset me dal deya taki o(1) me ho jaye acccess
+    for(string &word : wordDict){
+        st.insert(word);
+    }
+    return solve(0, s);
+    }
+};
