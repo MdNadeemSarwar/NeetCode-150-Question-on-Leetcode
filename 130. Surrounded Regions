@@ -1,0 +1,72 @@
+Tumhe ek grid di gayi hai (board) jo sirf 'X' aur 'O' se bani hai.
+Rule ye hai ki:
+Agar koi 'O' chaaro taraf se (upar, niche, left, right) 'X' se ghera hua hai → usko 'X' bana do.
+Agar koi 'O' border se connected hai → usko safe samjho aur as-it-is chhodo.
+
+🔹 Logic (High Level)
+=>>>> Border wale O ko bachao
+First row, last row, first column, last column check karo.
+Jahan bhi 'O' mile, wahan se DFS/BFS chalao.
+DFS/BFS ke through uske connected 'O' ko safe mark kar do (e.g. '#' se temporarily replace).
+=>>> Board traverse karo
+Jo 'O' bache → wo surrounded hain → unko 'X' bana do.
+Jo '#' hain → wo safe the → unko wapas 'O' bana do.
+
+Step 1: Border check
+Border pe jo 'O' mile → DFS/BFS chalao. 👉 Last row, col=1 pe 'O' hai. DFS se uske connected 'O' ko mark karo '#'.
+Step 2: Traverse full board
+Ab jitne 'O' bache → wo surrounded hain. Inko 'X' bana do. Jitne '#' hain → wapas 'O' bana do.
+
+Time Complexity: O(M × N) → har cell ko ek hi baar visit karte ho.
+Space Complexity: O(M × N) worst case (DFS stack ya BFS queue ke liye).
+
+class Solution {
+public:
+     void dfs(vector<vector<char>>& board, int i, int j) {
+        
+        int m = board.size();        // rows
+        int n = board[0].size();     // cols
+
+        // agar index bahar hai ya O nahi mila to return
+        if (i < 0 || i >= m || j < 0 || j >= n || board[i][j] != 'O')
+            return;
+
+        // safe mark kar do (temporary '#')
+        board[i][j] = '#';
+
+        // explore 4 directions
+        dfs(board, i+1, j);  // down
+        dfs(board, i-1, j);  // up
+        dfs(board, i, j+1);  // right
+        dfs(board, i, j-1);  // left
+    }
+
+    void solve(vector<vector<char>>& board) {
+    if (board.empty() || board[0].empty()) return;  // ✅ safety check
+
+        int m = board.size();    // rows
+        int n = board[0].size(); // cols
+
+        // 1border pe jitne 'O' hai unse DFS chalao 1st row last row or 1st col last col 
+        for (int i = 0; i < m; i++) {   // rows traverse
+            if (board[i][0] == 'O') dfs(board, i, 0);        // first col
+            if (board[i][n-1] == 'O') dfs(board, i, n-1);    // last col
+        }
+        for (int j = 0; j < n; j++) {   // cols traverse
+            if (board[0][j] == 'O') dfs(board, 0, j);        // first row
+            if (board[m-1][j] == 'O') dfs(board, m-1, j);    // last row
+        }
+
+        // ✅ 2. pura board traverse karke flip karo
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 'O') {
+                    board[i][j] = 'X'; // surrounded O -> X
+                } else if (board[i][j] == '#') {
+                    board[i][j] = 'O'; // safe O -> restore
+                }
+            }
+        }
+
+    }
+};
