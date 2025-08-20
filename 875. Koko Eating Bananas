@@ -80,3 +80,104 @@ public:
         return l;
     }
 };
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Initial values:
+
+piles = [3, 6, 7, 11]
+
+h = 8
+
+l = 1
+
+r = max(piles) = 11
+
+Loop condition: while (l < r).
+
+Iteration 1
+
+l = 1, r = 11
+mid = l + (r-l)/2 = 1 + (10)/2 = 6
+Call canEatAll(piles, givenHour = 6, h = 8)
+Compute actualHour step-by-step:
+For x = 3:
+x / 6 = 0 (integer division), x % 6 != 0 → add 1 hour → actualHour = 1
+(Interpretation: pile of 3 with speed 6 takes 1 hour)
+
+For x = 6:
+6 / 6 = 1, 6 % 6 == 0 → no extra → actualHour = 1 + 1 = 2
+(pile 6 takes 1 hour)
+
+For x = 7:
+7 / 6 = 1, 7 % 6 != 0 → extra 1 → actualHour = 2 + 1 + 1 = 4
+(pile 7 takes 2 hours: 6 + 1)
+
+For x = 11:
+11 / 6 = 1, 11 % 6 != 0 → extra 1 → actualHour = 4 + 1 + 1 = 6
+(pile 11 takes 2 hours: 6 + 5)
+
+Final actualHour = 6.
+Check actualHour <= h → 6 <= 8 → true.
+
+So canEatAll(6) == true → we can eat all with speed 6.
+Action in binary search: r = mid = 6.
+
+Iteration 2
+New l = 1, r = 6
+mid = 1 + (6-1)/2 = 1 + 5/2 = 3 (integer)
+Call canEatAll(piles, givenHour = 3, h = 8)
+
+Compute actualHour:
+
+x = 3: 3/3 = 1, 3%3==0 → +1 → actualHour = 1
+x = 6: 6/3 = 2, 6%3==0 → +2 → actualHour = 3
+x = 7: 7/3 = 2, 7%3 != 0 → + (2 + 1) → actualHour = 3 + 3 = 6
+(7 needs 3 hours at speed 3: 3+3+1)
+x = 11: 11/3 = 3, 11%3 != 0 → + (3 + 1) → actualHour = 6 + 4 = 10
+
+(11 needs 4 hours at speed 3)
+
+Final actualHour = 10.
+Check 10 <= 8 → false.
+
+So canEatAll(3) == false → speed 3 not enough.
+Action: l = mid + 1 = 4.
+
+Iteration 3
+Now l = 4, r = 6
+mid = 4 + (6-4)/2 = 4 + 2/2 = 5
+Call canEatAll(piles, givenHour = 5, h = 8)
+
+Compute actualHour:
+
+x = 3: 3/5 = 0, remainder -> +1 → actualHour = 1 (3 takes 1 hour)
+x = 6: 6/5 = 1, remainder -> +1 → actualHour = 1 + 2 = 3 (6 takes 2 hours)
+x = 7: 7/5 = 1, remainder -> +1 → actualHour = 3 + 2 = 5 (7 takes 2 hours)
+x = 11: 11/5 = 2, remainder -> +1 → actualHour = 5 + 3 = 8 (11 takes 3 hours)
+
+Final actualHour = 8.
+Check 8 <= 8 → true.
+So canEatAll(5) == true → action: r = mid = 5.
+
+Iteration 4
+l = 4, r = 5
+mid = 4 + (5-4)/2 = 4 + 1/2 = 4 (integer)
+Call canEatAll(piles, givenHour = 4, h = 8)
+
+Compute actualHour:
+
+x = 3: 3/4 = 0, remainder -> +1 → actualHour = 1
+x = 6: 6/4 = 1, remainder -> +1 → actualHour = 1 + 2 = 3 (6 needs 2 hours: 4+2)
+x = 7: 7/4 = 1, remainder -> +1 → actualHour = 3 + 2 = 5 (7 needs 2 hours)
+x = 11: 11/4 = 2, remainder -> +1 → actualHour = 5 + 3 = 8 (11 needs 3 hours)
+
+Final actualHour = 8.
+Check 8 <= 8 → true.
+
+So canEatAll(4) == true → action: r = mid = 4.
+Now loop condition
+Afte last step l = 4, r = 4.
+while(l < r) condition fails (4 < 4 false) → exit loop.
+Return l → return 4.
+Answer = 4 → exactly what we expected.
