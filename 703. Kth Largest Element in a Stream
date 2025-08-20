@@ -1,0 +1,45 @@
+Tumhe ek class KthLargest banana hai jo:
+Pehle initialize hota hai ek integer k aur ek list of numbers se.
+Har baar jab ek naya number add(val) karega, to hume k-th largest number (matlab "sorted order me peeche se k-th number") return karna hai.
+💡 Intuition
+Agar hume k-th largest element chahiye hamesha → iska matlab hume k sabse bade numbers track karne hain.
+Iske liye ek Min Heap (priority_queue in C++) use karte hain:
+Heap me hamesha k elements rakhte hain.
+Heap ka top (minimum) element hamesha k-th largest hota hai. 👉 Kyon min-heap? Largest numbers me se sabse chhota rakhenge → wahi k-th largest hoga.
+
+⚙️ Approach Constructor me:
+Saare nums heap me daal do.
+Agar size > k ho gaya, to chhota element hata do.
+End me heap me sirf top k numbers rahenge.
+Jab add(val) call ho:
+Heap me val daal do.
+Agar size > k ho gaya → ek chhota element nikal do.
+Heap ka top return karo (yahi k-th largest hai).
+
+⏱️ Time Complexity
+Har add operation: O(log k) (heap me insert/remove).
+Initialization: O(n log k).
+Space: O(k) (heap size max k hi hota hai).
+
+class KthLargest {
+    priority_queue<int, vector<int>, greater<int>> minHeap; // min-heap
+    int k;
+public:
+    KthLargest(int k, vector<int>& nums) {
+        this->k = k;
+        for (int num : nums) {
+            minHeap.push(num);
+            if (minHeap.size() > k) {
+                minHeap.pop();
+            }
+        }
+    }
+    
+    int add(int val) {
+        minHeap.push(val);
+        if (minHeap.size() > k) {
+            minHeap.pop();
+        }
+        return minHeap.top(); // k-th largest
+    }
+};
