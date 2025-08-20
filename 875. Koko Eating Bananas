@@ -1,0 +1,82 @@
+Ek bandar hai – Koko 🐒.
+Uske paas bananas ke piles ( ढेर ) rakhe hue hain.
+Har pile me kuch bananas hain. Example:
+
+piles = [3, 6, 7, 11]
+Matlab:
+Pehle ढेर me 3 bananas
+Dusre ढेर me 6 bananas
+Teesre ढेर me 7 bananas
+Chauthe ढेर me 11 bananas
+
+Koko ko sab khatam karne hain ek fixed speed k bananas per hour ke hisaab se. Aur total Koko ke paas h ghante ka time hai.
+
+Question pooch raha hai:
+👉 Koko ko minimum speed (k) se khana hoga taaki wo h ghanto ke andar sab khatam kar paaye?
+
+Important Rule
+Ek pile me Koko jab start karega, wo usi pile ke bananas khayega us hour me.
+Agar bananas kam hain k se, toh wo 1 ghanta hi lega (chaahe pile 3 ho aur speed 4, fir bhi 1 ghanta lagega).
+Agar pile me bananas jyada hain, toh usko ceil(pile / k) hours lagenge.
+
+Ab Example 1: piles = [3, 6, 7, 11]  h = 8
+
+Step 1: Try k = 3
+pile = 3 → 1 ghanta
+pile = 6 → 2 ghante (3+3)
+pile = 7 → 3 ghante (3+3+1)
+pile = 11 → 4 ghante (3+3+3+2)
+Total = 10 hours ❌ (limit se jyada ho gaya)
+
+Step 2: Try k = 4
+pile = 3 → 1 ghanta
+pile = 6 → 2 ghante (4+2)
+pile = 7 → 2 ghante (4+3)
+pile = 11 → 3 ghante (4+4+3)
+Total = 8 hours ✅ (perfect fit)
+
+Step 3: Check smaller k
+k=3 → 10 hours (nahi possible)
+k=4 → 8 hours (possible)
+Matlab minimum k = 4 hai. ✔️
+👉 Matlab Koko ko 4 bananas per hour khane ki speed rakhni padegi, tabhi wo 8 hours ke andar sab pile khatam kar paayega.
+
+TC = O(n × log(maxPile))
+SC = O(1)
+
+class Solution {
+public:
+    
+    bool canEatAll(vector<int>& piles, int givenHour, int h) {
+        int actualHour = 0;
+        
+        for(int &x : piles) {
+            actualHour += x/givenHour;
+            
+            if(x%givenHour != 0)
+                actualHour++;
+            
+        }
+        
+        return actualHour <= h;
+    }
+    
+    int minEatingSpeed(vector<int>& piles, int h) {
+        int n = piles.size();
+        
+        int l = 1, r = *max_element(begin(piles), end(piles));
+        
+        while(l < r) {
+            int mid = l + (r-l)/2;
+            
+            if(canEatAll(piles, mid, h)) {
+                r = mid;
+            } else {
+                l = mid+1;
+            }
+            
+        }
+        
+        return l;
+    }
+};
