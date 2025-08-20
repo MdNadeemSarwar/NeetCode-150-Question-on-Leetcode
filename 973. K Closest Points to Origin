@@ -1,0 +1,44 @@
+Aapko ek 2D plane pe kuch points diye gaye hain (x, y). Origin ka matlab hai point (0, 0).
+Aapko k points choose karne hain jo origin ke sabse paas (closest) ho.
+
+👉 Distance formula from origin = √(x² + y²).
+But compare karne ke liye hame square root ki need nahi hai, kyunki √ sabke liye same effect karega. So hum sirf x² + y² use karte hain.
+
+🔹 Example Input: points = [[1,3],[-2,2],[5,8],[0,1]], k = 2
+
+Distance of [1,3] = 1² + 3² = 10
+Distance of [-2,2] = (-2)² + 2² = 8
+Distance of [5,8] = 25 + 64 = 89
+Distance of [0,1] = 0² + 1² = 1
+
+Sorted by distance: [[0,1], [-2,2], [1,3], [5,8]]
+Pick first k=2: [[0,1], [-2,2]]
+
+👉 Ye line points ko sort karegi based on distance from origin.
+a[0]*a[0] + a[1]*a[1] → distance² of point a
+b[0]*b[0] + b[1]*b[1] → distance² of point b
+Comparator function check karega:
+Agar distance(a) < distance(b) → a ko pehle rakho.
+Agar distance(a) >= distance(b) → b ko pehle rakho.
+
+👉 Yaha hum sirf pehle k elements uthate hain sorted points ke. vector<vector<int>> ans(points.begin(), points.begin() + k); 
+Agar k=2 hai → points.begin() se lekar points.begin() + 2 tak uthao.
+👉 Ye ans return kar dega → [[0,1], [-2,2]]
+
+🔹 Complexity Analysis:
+TC = O(N log N) (N = number of points)
+SC = O(1) (agar sort inplace hota hai) + O(k) (answer ke liye)
+
+class Solution {
+public:
+    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+      // sort points based on distance from origin
+        sort(points.begin(), points.end(), [](vector<int>& a, vector<int>& b) {
+            return a[0]*a[0] + a[1]*a[1] < b[0]*b[0] + b[1]*b[1];
+        });
+
+        // 1 ans vector baneke uske anda k value dal deya pick first k points
+        vector<vector<int>> ans(points.begin(), points.begin() + k);
+        return ans;  
+    }
+};
