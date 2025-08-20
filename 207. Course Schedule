@@ -1,0 +1,81 @@
+Socho tum ek college student ho, aur tumhe kai alag-alag courses (subjects) lene hain.
+Courses ko numbers se label kiya gaya hai: 0, 1, 2, ..., numCourses-1.
+Lekin sabhi courses tum directly nahi le sakte. Kuch courses ke liye pehle ek aur course pass karna compulsory hai.
+Isi rule ko bolte hain prerequisite. 👉 prerequisite ka matlab: “isse pehle tumhe yeh course complete karna hoga”.
+
+Approaches
+A) DFS + Cycle Detection
+For each node, run DFS
+Maintain states:
+0 = not visited
+1 = visiting (currently in recursion stack)
+2 = visited completely
+Agar DFS ke time kisi node pe wapas aaye jiska state = 1 (already in recursion) → cycle
+
+B) BFS (Kahn’s Algorithm – Topological Sort)
+Count in-degree of each node
+Start with nodes with in-degree = 0
+Remove edges iteratively
+Agar sabhi nodes process ho gaye → no cycle (true)
+Agar kuch nodes bache with nonzero in-degree → cycle (false)
+Both work.
+
+Step-by-Step Algorithm (DFS Method)
+Build adjacency list graph: graph[course] = list of next courses
+Make visited array size numCourses (all 0 initially)
+For each course i:
+if not visited → run DFS(i)
+DFS:
+mark visiting (1)
+for each neighbor:
+if neighbor = visiting (1) → cycle → false
+if neighbor = not visited (0) → DFS(neighbor)
+mark visited (2)
+If no cycle found → return true
+
+Time: O(N + E) → N = numCourses, E = prerequisites.size()
+Space: O(N + E) → adjacency list + visited array + recursion stack
+
+class Solution {
+public:
+    // DFS function: return false if cycle detected
+    bool dfs(int course, vector<vector<int>>& graph, vector<int>& visited) {
+        // visited: 0 = not visited, 1 = visiting, 2 = fully visited
+        visited[course] = 1; // mark as visiting
+
+        for (int nextCourse : graph[course]) {
+            if (visited[nextCourse] == 1) {
+                // nextCourse already in current path → cycle
+                return false;
+            }
+            if (visited[nextCourse] == 0) {
+                // nextCourse not visited → visit it
+                if (!dfs(nextCourse, graph, visited)) return false;
+            }
+        }
+
+        visited[course] = 2; // mark as fully visited
+        return true; // no cycle detected for this path
+    }
+
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        vector<vector<int>> graph(numCourses); // adjacency list
+
+        // build graph: b -> a (prerequisite)
+        for (auto &p : prerequisites) {
+            int a = p[0];
+            int b = p[1];
+            graph[b].push_back(a);
+        }
+
+        vector<int> visited(numCourses, 0); // all courses initially not visited
+
+        for (int i = 0; i < numCourses; i++) {
+            if (visited[i] == 0) {
+                if (!dfs(i, graph, visited)) return false; // cycle found
+            }
+        }
+
+        return true; // no cycles → possible
+    }
+};
