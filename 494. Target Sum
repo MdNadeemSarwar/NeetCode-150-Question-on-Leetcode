@@ -1,0 +1,57 @@
+🔹 Problem samajho
+hume + aur - assign karke target banana hai.
+Example: nums = [1,1,1,1,1], target = 3
+output = 5 ways.
+
+🔹 Formula logic kyu aaya? maan lo total sum of array = S. ab hum array ko do groups me divide karenge:
+P (positive numbers ka set)
+N (negative numbers ka set)
+tab equation banti hai: sum(P) - sum(N) = target
+aur hume pata hai: sum(P) + sum(N) = S   (kyunki saare numbers positive hi hote hain array me originally)
+
+👉 dono equations add kar do:
+(sum(P) - sum(N)) + (sum(P) + sum(N)) = target + S
+2 * sum(P) = target + S
+sum(P) = (target + S) / 2
+
+⚡ iska matlab:
+problem reduce ho gayi subset sum problem me → hume count karna hai ki kitne subsets ka sum (target + S) / 2 ke barabar hai.
+
+🔹 Example Dry Run
+nums = [1,1,1,1,1], target = 3
+S = 5
+target + S = 3 + 5 = 8
+(target + S) / 2 = 8/2 = 4
+
+👉 ab problem ban gayi:
+Count number of subsets of nums whose sum = 4
+🔹 Subsets of [1,1,1,1,1] whose sum = 4
+possible subsets:
+{1,1,1,1} → sum = 4
+{1,1,1,1} (alag combinations, kyunki sab elements alag index pe hain)
+total = 5 subsets.
+🔹 matlab answer = 5 ways ✅
+
+TC-> O(N*M)
+SC-> O(N*M)
+
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        int S = accumulate(nums.begin(), nums.end(), 0);
+        // agar (S + target) odd hai ya target > S hai -> no solution
+        if ((S + target) % 2 != 0 || abs(target) > S) return 0;
+
+        int newTarget = (S + target) / 2;
+         // DP: subset sum count
+        vector<int> dp(newTarget + 1, 0);
+        
+        dp[0] = 1;
+
+        for (int num : nums) {
+        for (int j = newTarget; j >= num; j--) {
+            dp[j] += dp[j - num];
+        }}
+        return dp[newTarget];
+    }
+};
