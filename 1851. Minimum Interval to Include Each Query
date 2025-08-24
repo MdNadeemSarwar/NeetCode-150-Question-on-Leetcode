@@ -1,0 +1,119 @@
+Hume intervals = [[l, r], ...] diye gaye hain. Har interval ek range represent karta hai: l se r tak. Aur har query ke liye hume check karna hai:
+Kya koi interval hai jo is query ko cover karta hai? (matlab l <= query <= r)
+Agar multiple intervals hain jo query ko cover karte hain → sabse chhoti length wale interval ka size return karo.
+Agar koi interval cover nahi karta → -1.  Interval size = (r - l + 1).
+
+Example 1:
+intervals = [[1,4],[2,4],[3,6],[4,4]]
+queries = [2,3,4,5]
+
+Query 2 →
+Intervals containing 2: [1,4], [2,4]
+Sizes: 4, 3 → minimum = 3 ✅
+
+Query 3 →
+Intervals containing 3: [1,4], [2,4], [3,6]
+Sizes: 4, 3, 4 → minimum = 3 ✅
+
+Query 4 →
+Intervals containing 4: [1,4], [2,4], [3,6], [4,4]
+Sizes: 4, 3, 4, 1 → minimum = 1 ✅
+
+Query 5 →
+Intervals containing 5: [3,6]
+Size = 4 ✅
+Output → [3,3,1,4] ✔
+Har query ke liye sare intervals check kar lo → O(N * Q).
+Constraints: N, Q up to 1e5 → 1e10 operations (TLE hoga). ❌
+
+🔹 Efficient Approach (intuition)
+Is problem ka trick hai:
+👉 Offline queries + Priority Queue (Min-Heap)
+
+Idea: Queries ko sort kar do increasing order me. Intervals ko unke left ke according sort kar do.
+Ek min-heap maintain karo jisme current query ko cover karne wale intervals hon.
+Heap me (interval size, right) rakhenge. Sirf wo intervals rakhenge jo query ko cover kar sakte hain.
+Agar heap ka top interval ab query ko cover nahi karta (right < query) to usko pop kar denge.
+Har query ke liye: Sare intervals jinka left <= query hai, unhe heap me push karo.
+Fir heap ke top me sabse chhota interval size milega.
+
+🔹 Step by Step Dry Run Example 1: 
+intervals = [[1,4],[2,4],[3,6],[4,4]]
+queries = [2,3,4,5]
+
+Sort intervals by left:
+[[1,4],[2,4],[3,6],[4,4]] (already sorted)
+
+Queries sorted with index:
+[(2,0),(3,1),(4,2),(5,3)]
+
+Process:
+Query = 2
+Add intervals with left <= 2 → [1,4](size 4), [2,4](size 3)
+Heap = [(3,4),(4,4)]
+Top = 3 → ans[0] = 3
+
+Query = 3
+Add intervals with left <= 3 → add [3,6](size 4)
+Heap = [(3,4),(4,4),(4,6)]
+Remove invalid (right < 3)? none.
+Top = 3 → ans[1] = 3
+
+Query = 4
+Add intervals with left <= 4 → add [4,4](size 1)
+Heap = [(1,4),(3,4),(4,6),(4,4)]
+Remove invalid (right < 4)? none.
+Top = 1 → ans[2] = 1
+
+Query = 5
+Add intervals with left <= 5 → none left
+Remove invalid (right < 5) → remove [1,4], [2,4], [4,4]
+Heap = [(4,6)]
+
+Top = 4 → ans[3] = 4
+Final ans = [3,3,1,4] ✅
+
+Sorting intervals: O(N log N)
+Sorting queries: O(Q log Q)
+Har interval ek bar push aur ek bar pop hoga heap me → O(N log N)
+Har query ek bar heap ke saath interact karega → O(Q log N)
+👉 Total TC: O((N+Q) log N)
+👉 SC: O(N+Q) (heap + extra arrays)
+
+class Solution {
+public:
+    vector<int> minInterval(vector<vector<int>>& intervals, vector<int>& queries) {
+        // Sort intervals by left
+       sort(intervals.begin(), intervals.end());
+        // Store queries with original index
+       vector<pair<int, int>> q;
+       for(int i=0; i<queries.size(); i++){
+            q.push_back({queries[i], i});
+       }
+       sort(q.begin(), q.end());
+
+       vector<int> ans(queries.size(), -1);
+        // Min-heap of {size, right}
+       priority_queue<pair<int, int>,vector<pair<int, int>>, greater<pair<int, int>>> pq;
+       int i =0;
+
+       for(auto [query, idx]: q){
+            // Push intervals whose left <= query
+            while(i <intervals.size() && intervals[i][0] <= query){
+                int left = intervals[i][0], right = intervals[i][1];
+                int size = right - left + 1;
+                pq.push({size, right});
+                i++;
+            }
+            // Remove intervals which cannot cover query
+            while(!pq.empty() && pq.top().second < query){
+                pq.pop();
+            }
+             // Answer
+            if(!pq.empty()){
+                ans[idx] = pq.top().first;
+            }
+       }
+       return ans;
+    }
+};
