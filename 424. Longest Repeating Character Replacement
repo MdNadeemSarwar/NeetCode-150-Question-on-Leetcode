@@ -1,0 +1,103 @@
+🔹 Problem Samajhna
+Tumhe ek string s aur ek number k diya hai.
+Tum maximum k characters change karke sabse bada substring banana chahte ho jisme sirf ek hi character repeat ho raha ho.
+👉 Example: s = "ABAB", k = 2
+Tum A ko B me ya B ko A me change kar sakte ho.
+Agar dono A ko B bana do → "BBBB" ban gaya → length = 4 ✅
+
+🔹 Key Intuition
+Hume ek substring lena hai aur dekhna hai kya at most k replacement karke usme sabhi characters ek hi ban sakte hain. Kaise check karenge?
+Ek substring me sabse zyada repeat hone wala character fix kar lo.
+Baaki characters ko usme convert karna hoga.
+Required replacements = window_size - max_freq_in_window.
+Agar ye ≤ k hai → window valid hai.
+
+🔹 Approach (Sliding Window)
+Ek sliding window (l..r) maintain karo.
+Har step me right character include karo aur uska frequency map update karo.
+Current window ka max_freq track karo.
+Agar (window_size - max_freq) > k → window invalid → left pointer ko slide karo.
+Har step pe max window length update kar lo.
+
+🔹 Dry Run
+s = "AABABBA", k = 1
+Start: l=0, r=0 → window="A" → max_freq=1 → window_size=1 → valid → ans=1
+r=1 → window="AA" → max_freq=2 → window_size=2 → valid → ans=2
+r=2 → window="AAB" → max_freq=2 → window_size=3 → replacements=1 → valid → ans=3
+r=3 → window="AABA" → max_freq=3 → window_size=4 → replacements=1 → valid → ans=4
+r=4 → window="AABAB" → max_freq=3 → window_size=5 → replacements=2 → invalid → shift l=1
+Now window="ABAB" → max_freq=2 → window_size=4 → replacements=2 → invalid → shift l=2
+Window="BAB" → max_freq=2 → window_size=3 → valid → ans=4 (still max)
+Continue → finally ans=4 ✅
+
+s[right] - 'A' kyu?
+String me uppercase letters A..Z hote hain.
+ASCII me: 'A' ka index 65 hota hai
+'C' - 'A' = 67 - 65 = 2
+Isse hum letter ko 0..25 index me map kar lete hain, aur freq[26] array se frequency count kar lete hain.
+Example:
+'A' - 'A' = 0
+'B' - 'A' = 1
+'Z' - 'A' = 25
+             Q/A
+1) right - left + 1 = window size kyun?
+Hamari sliding window left se right tak inclusive hoti hai.
+Length (size) ka formula:
+agar left = 0, right = 0 → size = 1
+agar left = 0, right = 3 → indices 0,1,2,3 = 4 chars
+General formula: right - left + 1
+
+2) replacements = window_size - maxCount kyun?
+Hume window ke saare characters ko SAME banana hai. Sabse sasta tareeka kya?
+👉 Jo character already sabse zyada baar aata hai usko target letter maan lo (kyunki usko change karna sabse kam padega).
+maxCount = window me most frequent character ki count
+Baaki sab ko usi character me replace karna hoga
+Required replacements = total chars − already-correct chars
+⇒ (right - left + 1) - maxCount
+Example: Window "AABA": counts → A=3, B=1
+window_size = 4
+maxCount = 3 (A)
+replacements = 4 − 3 = 1 (sirf ek B ko A karna hai)
+
+3) Jab required > k ho to left++ kyun?
+k = allowed replacements (limit)
+Agar required > k, matlab ye window zyada badi ho gayi: isko chhota karo.
+Window chhoti kaise hogi? Left ko aage badhao (left++), aur jo char bahar gaya uski frequency ko -1 karo:
+freq[s[left] - 'A']--;
+left++;
+Hum left ko tab tak badhate hain jab tak required ≤ k ho jaaye. Tab window phir se valid ho jaati hai.
+
+Time: O(N) (har char window me ek baar aata + ek baar nikalta)
+Space: O(26) ~ O(1)
+
+class Solution {
+public:
+    int characterReplacement(string s, int k) {
+       vector<int> freq(26, 0);   // 26 uppercase letters ke counts
+        int left = 0;              // window ka left pointer
+        int maxCount = 0;          // window me sabse zyada baar aane wale char ki count
+        int ans = 0;               // best (max) window length
+
+        for (int right = 0; right < (int)s.size(); right++) {
+            // 1) right char ko include karo aur uska freq badhao
+            freq[s[right] - 'A']++;
+
+            // 2) maxCount update karo (abhi wali window me max freq)
+
+            maxCount = max(maxCount, freq[s[right] - 'A']);
+
+            // 3) check: kitne replacements chahiye is window ko single-letter banane me?
+            // replacements = window_size - maxCount  ye window size nekal raha hai right - left + 1
+            // agar required > k => window bada hai, left ko aage badhao jab tak valid na ho jaye
+            while ((right - left + 1) - maxCount > k) {
+        // yaha maxcount yani manlo A 3 bar aaya hai windowsize = 4 = 4 - 3 = 1 yane bas 1 digit ko change karke B karna hai 
+                freq[s[left] - 'A']--;
+                left++;
+            }
+
+            // 4) yahan tak aa gaye matlab window valid hai; answer update karo
+            ans = max(ans, right - left + 1);
+        }
+        return ans;   
+    }
+};
