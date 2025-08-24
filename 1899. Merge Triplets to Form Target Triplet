@@ -1,0 +1,84 @@
+🔹 Problem Samajhna
+
+Hume triplets = [[a,b,c], ...] diye gaye hain.Hume target = [x,y,z] banana hai.
+Operation allowed:
+Do triplets i aur j uthao aur triplets[j] = [max(ai, aj), max(bi, bj), max(ci, cj)] bana do.
+Matlab hum merge karke har coordinate ka maximum le sakte hain. Ye operation multiple times kar sakte hain.
+Goal: Check karo ki kya target = [x,y,z] kisi triplet me ban sakta hai.
+
+🔹 Key Observation
+👉 Operation sirf maximum le raha hai.
+Matlab koi bhi coordinate kabhi chhota nahi hoga, sirf same ya bada hoga.
+Toh agar target banana hai, hume aise triplets chahiye jisme:
+Pehle coordinate me x ho aur wo y aur z se bada na ho
+Dusre coordinate me y ho aur wo x aur z se bada na ho
+Teesre coordinate me z ho aur wo x aur y se bada na ho
+
+Matlab: Har coordinate ke liye at least ek triplet hona chahiye jo us coordinate ko exactly match karta ho aur baaki coordinates target se exceed na kare.
+Agar ye teeno conditions puri hoti hain → target ban jaayega.
+
+🔹 Approach
+Har triplet [a,b,c] iterate karo.
+Agar koi coordinate target se bada hai (jaise a > x ya b > y ya c > z) → is triplet ko ignore karo (useless hai, kyunki merge karke hamara target exceed ho jaayega).
+Agar koi valid triplet hai:
+Agar a == x → x coordinate cover ho gaya.
+Agar b == y → y coordinate cover ho gaya.
+Agar c == z → z coordinate cover ho gaya.
+Agar teeno cover ho gaye → return true.
+Warna loop ke baad false.
+
+Example 1:
+triplets = [[2,5,3],[1,8,4],[1,7,5]]
+target = [2,7,5]
+
+[2,5,3] → valid (sab target se ≤)
+has x = 2 ✅
+[1,8,4] → skip (8 > 7) ❌
+[1,7,5] → valid
+has y = 7 ✅
+has z = 5 ✅
+→x,y,z teeno mil gaye → return true ✅
+
+Example 2:
+triplets = [[3,4,5],[4,5,6]]
+target = [3,2,5]
+[3,4,5] → skip (4 > 2) ❌
+[4,5,6] → skip (4 > 3, 5 > 2, 6 > 5) ❌
+Koi valid triplet nahi → false ✅
+
+Example 3:
+triplets = [[2,5,3],[2,3,4],[1,2,5],[5,2,3]]
+target = [5,5,5]
+[2,5,3] → valid, has y=5
+[2,3,4] → valid
+[1,2,5] → valid, has z=5
+[5,2,3] → valid, has x=5
+x=5, y=5, z=5 sab cover ho gaye → true ✅
+
+TC = O(N)
+SC = O(1) 
+
+class Solution {
+public:
+    bool mergeTriplets(vector<vector<int>>& triplets, vector<int>& target) {
+
+        int x = target[0], y = target[1], z= target[2];
+        bool cx = false, cy= false, cz=false;
+
+        for(auto &t : triplets){
+            int a = t[0], b = t[1], c = t[2];
+            // discard if any value > target
+            if(a > x || b > y || c > z){
+                continue;
+            }
+            if(a == x) cx = true;
+            if(b == y) cy = true;
+            if(c == z) cz = true;
+
+            if(cx && cy && cz){
+                return true;
+            }
+        }
+        return false;
+    }
+};
