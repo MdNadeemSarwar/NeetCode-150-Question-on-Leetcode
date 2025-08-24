@@ -1,0 +1,95 @@
+Aapko ek aisa data structure banana hai jo same key ke multiple (value, timestamp) versions store kare.
+get(key, t) pe aapko wo value deni hai jiska timestamp <= t ho, aur unme sabse bada (latest) ho.
+Agar koi aisi value nahi hai (ya key hi nahi mili) to "" (empty string) return karna hai.
+
+Important constraint: har key ke liye set calls ka timestamp strictly increasing hoga.
+Iska matlab: set("foo", "bar", 1) ke baad agar dubara foo par set hoga to timestamp 2, 3, 4… aayenge (peeche nahi jayega).
+Isse per-key list sorted by time rehti hai, bina extra sort ke.
+
+Mini Example:
+set("foo","bar",1)
+set("foo","bar2",4)
+get("foo",3) → timestamp ≤ 3 me sirf (1,"bar") milta hai → "bar"
+get("foo",4) → exact 4 mil gaya → "bar2"
+get("foo",5) → ≤5 me largest timestamp 4 hai → "bar2"
+
+2) Intuition / Approach
+Har key ke liye hum timeline (sorted array) maintain karenge:
+set(key, value, t) ⇒ simply append (t, value) us key ki list me (kyunki timestamps strictly increasing hain).
+get(key, t) ⇒ hume us list me rightmost (ya floor) timestamp dhoondhna hai jo <= t ho. Ye classical binary search / upper_bound problem hai.
+Kyun binary search? Per key list sorted hoti hai. Binary search se O(log n) me hum floor timestamp nikal sakte hain (yahan n = us key ke versions).
+
+Data structure choice (C++):
+unordered_map<string, vector<pair<int,string>>> mp;
+mp[key] = vector of {timestamp, value}, strictly increasing timestamp ke saath.
+
+3) Algorithm (step-by-step, simple)
+set(key, value, timestamp)
+
+mp[key].push_back({timestamp, value});
+Bas append, kyunki timestamps badhte order me aate hi hain.
+get(key, t) — Manual Binary Search se
+Agar key exist hi nahi karta ⇒ return "".
+arr = mp[key] lo (ye vector sorted hai by timestamp).
+l = 0, r = arr.size()-1, ans = "".
+Jab tak l <= r:
+mid = l + (r - l) / 2.
+Agar arr[mid].first == t ⇒ exact match, return arr[mid].second.
+Agar arr[mid].first < t ⇒ ye ek valid candidate hai (≤ t).
+ans = arr[mid].second, aur right me search karo: l = mid + 1.
+Warna (arr[mid].first > t) ⇒ left me jao: r = mid - 1.
+Loop khatam ⇒ ans me latest ≤ t pada hoga (ya empty rahega agar kuch nahi mila). Return ans.
+
+Edge Cases (quick check)
+get on a key that was never set ⇒ "".
+get(key, t) where t is smaller than first timestamp ⇒ "".
+Many versions for same key ⇒ binary search still O(log n).
+Exact timestamp match ⇒ direct return.
+
+Time:
+set → O(1)
+get → O(log M)
+Space: O(N)
+
+class TimeMap {
+public:
+    unordered_map<string, vector<pair<int, string>>> map;
+    TimeMap() {
+        
+    }
+    
+    void set(string key, string value, int timestamp) {
+        map[key].push_back({timestamp, value});
+    }
+    
+    string get(string key, int timestamp) {
+        auto it = map.find(key);
+        if (it == map.end()) return "";
+
+        const auto &arr = it->second; // vector of {time, value}
+        int l = 0, r = (int)arr.size() - 1;
+        string ans = "";
+
+        while (l <= r) {
+            int mid = l + (r - l) / 2;
+            int tmid = arr[mid].first;
+
+            if (tmid == timestamp) {
+                return arr[mid].second; // exact match
+            } else if (tmid < timestamp) {
+                ans = arr[mid].second;  // candidate (<= timestamp)
+                l = mid + 1;            // try to find later one
+            } else {
+                r = mid - 1;            // go left
+            }
+        }
+        return ans; // "" if nothing <= timestamp`
+    }
+};
+
+/**
+ * Your TimeMap object will be instantiated and called as such:
+ * TimeMap* obj = new TimeMap();
+ * obj->set(key,value,timestamp);
+ * string param_2 = obj->get(key,timestamp);
+ */
