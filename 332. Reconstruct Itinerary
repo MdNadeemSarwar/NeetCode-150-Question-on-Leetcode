@@ -1,0 +1,89 @@
+Problem ko simple shabdon me samajho
+Hume flights ke tickets diye gaye hain: [from, to] edges hai directed graph ke.
+Hamesha start "JFK" se hoga.
+Hume ek valid path banana hai jo sabhi tickets exactly once use kare (jaise Eulerian path).
+Agar multiple valid path bane → lexicographically smallest choose karna hai.
+
+2) Key Observations
+Ye basically ek Eulerian Path problem hai (each edge ek bar use karna hai).
+Lexical order requirement hai → matlab jab hum ek node ke neighbours traverse karein, hume hamesha chhoti wali lexicographical destination pehle try karni chahiye.
+Agar hum normally DFS karein aur chhoti pehle lete rahe, ho sakta hai galat ho (dead end).
+Isliye use hota hai Hierholzer’s Algorithm: Eulerian path banane ke liye → DFS ke end me node ko result me dalte hain (backtracking style).
+
+3) Approach (Step by Step)
+Build graph:
+unordered_map<string, priority_queue<string, vector<string>, greater<string>>> graph;
+Kyunki hume lexicographically smallest chahiye, to har node ka adjacency list ek min-heap (priority_queue with greater) rakhenge.
+DFS / Hierholzer traversal:
+Start "JFK" se.
+Har step: jab tak current node ke adjacency me flights hai, ek ek karke lexicographically smallest next airport leke recursive DFS karo.
+Jab aur flight na bachi → node ko result list me dal do.
+DFS ke baad jo result banega wo reverse hoga (kyunki hum end me push kar rahe hain).
+Isliye reverse(result.begin(), result.end()).
+
+4) Example Dry Run
+tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]]
+Graph:
+
+JFK -> [ATL, SFO]  (min-heap → ATL comes first)
+SFO -> [ATL]
+ATL -> [JFK, SFO]
+
+DFS("JFK"):
+JFK → take ATL
+ATL → take JFK
+JFK → take SFO
+SFO → take ATL
+ATL → take SFO
+SFO → empty → add "SFO"
+add "ATL"
+add "SFO"
+add "JFK"
+add "ATL"
+add "JFK"
+Result reversed: ["JFK","ATL","JFK","SFO","ATL","SFO"]
+
+) Complexity Analysis
+N = number of tickets (≤ 300)
+Graph building: O(N log N) (log for pushing into min-heap)
+DFS: Each edge visited once → O(N log D) where D = outdegree (pq pop)
+Overall: O(N log N)
+Space: O(N) for graph + recursion stack.
+
+7) Summary
+Problem = Eulerian path with lexical order.
+Trick = Hierholzer’s algorithm + min-heap adjacency.
+DFS with backtracking, result reversed at end.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    unordered_map<string, priority_queue<string, vector<string>, greater<string>>> graph;
+    vector<string> route;
+
+    void dfs(string u) {
+        auto &pq = graph[u];
+        while (!pq.empty()) {
+            string v = pq.top(); pq.pop();
+            dfs(v);
+        }
+        // jab node ke sare edges khatam ho jaye tab add karo
+        route.push_back(u);
+    }
+
+    vector<string> findItinerary(vector<vector<string>>& tickets) {
+        // 1. build graph with min-heaps
+        for (auto &t : tickets) {
+            graph[t[0]].push(t[1]);
+        }
+
+        // 2. run DFS from "JFK"
+        dfs("JFK");
+
+        // 3. reverse route (kyunki humne end me push kiya tha)
+        reverse(route.begin(), route.end());
+        return route;
+    }
+};
