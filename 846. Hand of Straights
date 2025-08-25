@@ -1,0 +1,103 @@
+Question ye keh raha hai:
+Tumhare paas ek array hai numbers ka. Hand
+=> Tumhe poore array ko "chhote chhote packets" me divide karna hai.Har packet ka size fix = groupSize.
+=> Har packet ke andar ke numbers consecutive hone chahiye. (matlab ek ke baad ek jaise 2,3,4 ya 7,8,9). Agar kahin bhi required consecutive number missing ho gaya → impossible.
+Tumhe check karna hai: 👉 Kya possible hai sari cards ko aise divide karna?
+Agar haan → return true.
+Agar nahi → return false.
+
+✅ Dry Run Example 1 hand = [1,2,3,6,2,3,4,7,8], groupSize = 3
+
+Step 1: Check divisibility
+n = 9, groupSize = 3
+9 % 3 == 0 → proceed.
+
+Step 2: Frequency map banao
+Sorted frequency:
+1 → 1
+2 → 2
+3 → 2
+4 → 1
+6 → 1
+7 → 1
+8 → 1
+
+Step 3: Start loop (map not empty)
+👉 First iteration
+start = 1 (smallest element)
+Group banayenge: 1,2,3
+cnt[1] → 0 → erase 1
+cnt[2] → 1
+cnt[3] → 1
+
+Map ab:
+2 → 1
+3 → 1
+4 → 1
+6 → 1
+7 → 1
+8 → 1
+
+Formed group: [1,2,3]
+👉 Second iteration
+start = 2
+Group banayenge: 2,3,4
+cnt[2] → 0 → erase 2
+cnt[3] → 0 → erase 3
+cnt[4] → 0 → erase 4
+
+Map ab:
+6 → 1
+7 → 1
+8 → 1
+
+Formed group: [2,3,4]
+
+👉 Third iteration
+start = 6
+Group banayenge: 6,7,8
+cnt[6] → 0 → erase 6
+cnt[7] → 0 → erase 7
+cnt[8] → 0 → erase 8
+Map ab: empty ✅
+Formed group: [6,7,8]
+Step 4: Map empty → return true
+Answer = ✅ true
+
+✅ Dry Run Example 2
+hand = [1,2,3,4,5], groupSize = 4
+Step 1: Check divisibility
+n = 5, groupSize = 4
+5 % 4 != 0 → direct false 🚫
+Answer = ❌ false
+
+Time: O(n log K) (worst ~ O(n log n))
+Space: O(K)
+
+class Solution {
+public:
+    bool isNStraightHand(vector<int>& hand, int groupSize) {
+       int n = hand.size();
+
+        // Step 1: Agar total cards divisible nahi hai groupSize se to false de do
+        if (n % groupSize != 0) return false;
+
+        // Step 2: Frequency count using map (sorted order me rakhta hai)
+        map<int,int> cnt;
+        for (int x : hand) cnt[x]++;
+
+        // Step 3: Jab tak map empty nahi hota
+        while (!cnt.empty()) {
+            int start = cnt.begin()->first; // smallest element lo or uska keya value lelo
+
+            // Step 4: ek group banane ki koshish karo
+            for (int x = start; x < start + groupSize; x++) {
+                if (cnt.find(x) == cnt.end()) return false; // missing number
+                cnt[x]--; // use karo ek card or uska freq ghata do
+                if (cnt[x] == 0) cnt.erase(x); // Agar frequency 0 ho gayi → us element ko map se delete kar do.
+            }
+        }
+
+        return true; // sab group ban gaye
+    }
+};
