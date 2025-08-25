@@ -1,0 +1,110 @@
+Problem statement (samajhne layak tarike me):
+Aapko ek string s diya gaya hai. Hume is string ko aise partitions me todna hai ki ek character sirf ek partition me hi aaye. Matlab koi bhi character do alag partitions me repeat nahi hona chahiye.
+Aur hume output me har partition ka size dena hai.
+🔸 Example samajhte hain:
+Input: s = "ababcbacadefegdehijhklij"  Output: [9,7,8] Kyun? Partition banta hai:
+"ababcbaca" → size = 9
+"defegde" → size = 7
+"hijhklij" → size = 8
+Dekho, har character sirf ek hi partition me aaya. ✅
+
+🔸 Intuition (sochne ka tarika):
+Ek character ka last occurrence decide karega ki wo partition kahan tak chalega.
+Agar koi aur character uske beech me aya, to hume uska bhi last occurrence consider karna hoga.
+Jab tak current partition ka end nahi pohochta, tab tak tod nahi sakte.
+
+🔹 Partition ka intuition last occurrence se kyun juda hai?
+Socho tum string "ababcbacadefegdehijhklij" todna chahte ho.
+Jab tum pehle character 'a' ko dekhte ho (index=0),
+tumhe maloom hai ki 'a' ki last occurrence index=8 hai.
+Matlab jab tak tum 8 tak nahi pohochoge, tab tak 'a' complete cover nahi hua.
+Matlab partition minimum 0 se 8 tak hoga.
+Ab is beech (0 se 8) tum 'b' aur 'c' bhi dekhte ho.
+'b' ki last occurrence = 5
+'c' ki last occurrence = 7
+Yeh dono already 8 ke andar aa gaye ✅, matlab koi dikkat nahi.So partition ban gaya "ababcbaca" (0–8).
+
+🔹 Rule:
+Har character ke liye uska last occurrence dekhna padega.
+Current partition ka end wahi hoga jo ab tak ke characters ka maximum last occurrence hai.
+Jab tum i == end pohoch jao → matlab partition complete ✅.
+
+🔹 Chhota Example Dry Run  s = "eccbbbbdec"
+'e' (index=0) → last = 9 → end=9
+'c' (index=1) → last = 8 → end=max(9,8)=9
+'c' again
+'b' (index=3) → last=6 → end=max(9,6)=9
+...
+last me jab i=9, partition complete = length=10
+Output = [10]
+
+Step by Step Dry Run (s = "eccbbbbdec")
+s = eccbbbbdec
+index → 0 1 2 3 4 5 6 7 8 9
+chars → e c c b b b b d e c
+
+Step 1: Precompute last index of each char
+e → last = 8
+c → last = 9
+b → last = 6
+d → last = 7
+
+Step 2: Iterate with end = 0 initially
+👉 i=0, char=e → last[e]=8 → end=max(0,8)=8
+Partition abhi close nahi hoga, kyunki e ka last 8 tak hai.
+
+👉 i=1, char=c → last[c]=9 → end=max(8,9)=9
+Abhi bhi close nahi kar sakte, kyunki c ka last 9 hai.
+
+👉 i=2, char=c → last[c]=9 → end=max(9,9)=9
+
+👉 i=3, char=b → last[b]=6 → end=max(9,6)=9
+(yeh hi wo step hai jahan aap confuse hue the 👍)
+Reason: Hum partition tab tak close nahi kar sakte jab tak end (jo abhi 9 hai) tak nahi pahunch jaate. Kyunki hume ensure karna hai ki har character ki last occurrence usi partition me cover ho.
+
+b ka last to 6 hai, but c ka last 9 hai, matlab partition ko 6 pe cut nahi kar sakte.
+
+👉 i=4,5,6 bhi similar → end=9 hi rahega.
+👉 i=7, char=d → last[d]=7 → end=max(9,7)=9.
+👉 i=8, char=e → last[e]=8 → end=max(9,8)=9.
+👉 i=9, char=c → last[c]=9 → end=max(9,9)=9.
+Aur ab i == end ho gaya, matlab partition close ✅ Partition length = 9-0+1 = 10
+
+Time Complexity: O(n) → ek pass last occurrence ke liye + ek pass traverse ke liye.
+Space Complexity: O(1) → kyunki sirf 26 characters ke liye array banaya hai.
+
+class Solution {
+public:
+    vector<int> partitionLabels(string s) {
+        // ek vector banaya jisme 26 size h (a-z ke liye), initially 0 hai
+        vector<int> last(26, 0);
+
+        // ye loop har character ka **last index** store karega
+        for (int i = 0; i < s.size(); i++) {
+            last[s[i] - 'a'] = i;  
+            // example: agar 'a' mila index 5 pe to last['a'] = 5 store hoga
+        }
+
+        vector<int> ans;  // final answer store karne ke liye
+        int start = 0, end = 0;  // har partition ke starting aur ending point
+
+        // ab string traverse karenge
+        for (int i = 0; i < s.size(); i++) {
+            end = max(end, last[s[i] - 'a']);  
+            // har char ka last index dekh kar end ko update karte hain
+            // taki ensure ho ki iss partition me sab chars aa gaye hain
+
+            if (i == end) {  
+                // agar current index hi last index hai iss partition ka
+                // matlab ye ek partition complete ho gaya
+                ans.push_back(end - start + 1);  
+                // partition ka size store karenge (end - start + 1)
+
+                start = i + 1;  
+                // next partition ke liye start update kar diya
+            }
+        }
+
+        return ans;  // saare partition sizes return kar do
+    }
+};
