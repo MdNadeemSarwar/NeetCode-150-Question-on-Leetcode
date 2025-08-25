@@ -1,0 +1,130 @@
+🔹 Step 1: Question Samajhna
+Jaise aapke paas ek array [1, 5, 3, 4] agar ek sath hota, to aap easily sort karke median nikal lete.
+Lekin stream me data real-time aata hai (jaise sensor readings, live stock prices, ya real-time user input).
+Hume ek data structure banana hai jo 2 kaam kare:
+addNum(int num) → ek number stream me daalo.
+findMedian() → abhi tak jitne number aaye hain unka median nikalo.
+
+Median kya hota hai?
+Agar numbers sorted order me hain to:
+Odd count → middle element hi median
+Even count → dono middle ka average
+Example: [1, 3, 5] → median = 3
+[1, 3, 5, 7] → median = (3+5)/2 = 4
+
+👉 Median ka rule:
+Agar odd elements hain → beech wala element median hoga.
+Agar even elements hain → beech ke 2 elements ka average median hoga.
+Example: arr = [2,3,4] → median = 3 (middle element)
+arr = [2,3] → median = (2+3)/2 = 2.5
+
+👉Kya hame sort karna padta hai har bar?
+Agar aap har naya number aane par poore array ko sort karoge, to O(N log N) lagega.
+Aur kyunki data infinite ho sakta hai (stream), yeh slow ho jayega.
+👉 Isliye hum ek efficient way use karte hain: 2 heaps (max-heap + min-heap).
+
+🔹 Step 2: Intuition
+Agar har baar addNum ke baad hum pura array sort karein aur median nikaalein, to ye slow ho jaayega (O(n log n) har insertion).
+
+Efficient tarika kya hoga❓
+👉 Hume bas middle elements ka dhyaan rakhna hai, puri sorting ki zarurat nahi.
+🔑 Trick: Two Heaps ka use karenge
+Max-Heap (left side) → chhote numbers rakhta hai (largest top pe hoga).
+Min-Heap (right side) → bade numbers rakhta hai (smallest top pe hoga).
+
+⚖️ Balance maintain karna hoga:
+Dono heaps ke size ka difference zyada se zyada 1 ho.
+Taaki median easily nikal sake.
+
+🔹 Step 3: Approach
+Insertion rule:
+Agar num chhota/equal hai maxHeap.top se → maxHeap me daalo.
+Warna → minHeap me daalo.
+Rebalance rule:
+Agar kisi heap ka size dusre se >1 ho jaaye → element ko ek se dusre me shift karo.
+Find Median rule:
+Agar dono heaps ka size equal → median = (maxHeap.top + minHeap.top) / 2.
+Agar ek heap bada hai → uska top hi median hoga.
+
+👉Ek chhota sa analogy
+Socho tum line me logon ko do groups me baant rahe ho:
+Left group = chhote log (numbers) → inka leader (top) sabse bada chhota banda.
+Right group = bade log → inka leader sabse chhota bada banda.
+Beech ka boundary in do leaders ke beech hota hai.
+Median ko nikalna sirf leaders pe depend karta hai. Baaki sab kaam unnecessary hai.
+
+Step by Step Dry Run
+Input stream: [1, 5, 3, 4]
+👉 Start: MaxHeap = {}, MinHeap = {}
+Insert 1
+MaxHeap = {1}, MinHeap = {}
+Median = 1
+
+Insert 5
+Compare with maxHeap top (1). 5 > 1, so goes to MinHeap.
+MaxHeap = {1}, MinHeap = {5}
+Median = (1+5)/2 = 3
+
+Insert 3
+Compare with maxHeap top (1). 3 > 1, goes to MinHeap.
+MinHeap = {3,5}, MaxHeap = {1}
+Ab imbalance ho gaya (MinHeap zyada bada).
+Balance karne ke liye MinHeap ka top (3) MaxHeap me daal do.
+Final: MaxHeap = {3,1}, MinHeap = {5}
+Median = top of MaxHeap = 3
+
+Insert 4
+Compare with maxHeap top (3). 4 > 3, goes to MinHeap.
+MaxHeap = {3,1}, MinHeap = {4,5}
+Equal size → Median = (3+4)/2 = 3.5
+✅ Har step pe median nikal gaya bina har bar full sort kiye.
+
+Complexity
+addNum: heap push/pop → O(log n)
+findMedian: O(1)
+Space: O(n)
+
+class MedianFinder {
+public:
+    // left half: smaller numbers ka heap -> max-heap (top = largest of left)
+    priority_queue<int> maxHeap; // top pe high no hoga
+    // right half: larger numbers ka heap -> min-heap (top = smallest of right)
+    priority_queue<int, vector<int>, greater<int>> minHeap; // top pe low no hoga
+
+    MedianFinder() {}
+
+    void addNum(int num) {
+         // 1) decide kahan daalna hai
+        if (maxHeap.empty() || num <= maxHeap.top()) {
+            // num left half me fit hota hai
+            maxHeap.push(num);
+        } else {
+            // num right half me fit hota hai
+            minHeap.push(num);
+        }
+
+        // 2) rebalance sizes so that diff <= 1
+        if (maxHeap.size() > minHeap.size() + 1) {
+            // left bahut bada ho gaya -> left se top right me bhejo
+            minHeap.push(maxHeap.top());
+            maxHeap.pop();
+        } else if (minHeap.size() > maxHeap.size()) {
+            // right bada ho gaya -> right se top left me bhejo
+            maxHeap.push(minHeap.top());
+            minHeap.pop();
+        }
+        // Ab invariants hold:
+        // - size diff <= 1
+        // - maxHeap.top() <= minHeap.top() (ordering maintained by insertion rule)
+    }
+    
+    double findMedian() {
+         // Agar sizes barabar -> beech ke dono ka avg
+        if (maxHeap.size() == minHeap.size()) {
+            return (maxHeap.top() + minHeap.top()) / 2.0; // 2.0 to force double
+        }
+        // Warna left (maxHeap) hamesha 1 zyada rakha hai (odd case me)
+        return (double)maxHeap.top();
+    }
+};
+
