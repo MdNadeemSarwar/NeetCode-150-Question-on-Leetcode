@@ -1,0 +1,77 @@
+🔹 Pehle Question samajh lo:
+BST (Binary Search Tree) ka property hota hai:
+Left subtree ke saare nodes < root hote hai
+Right subtree ke saare nodes > root hote hai
+Agar hum inorder traversal (L → Root → R) karte hai BST ka, to hamesha sorted order me elements milte hai.
+👉 Matlab agar inorder traversal karoge, array ban jaega sorted. Usme se kth element pick kar lo → wahi answer hai.
+
+Step by Step Dry Run (Inorder: L → Root → R)
+Start inorder(root=5, k=3)
+→ call inorder(3) (left subtree)
+
+inorder(3)
+→ call inorder(2)
+
+inorder(2)
+→ call inorder(1)
+
+inorder(1)
+→ call inorder(NULL) → return
+
+Visit 1: count=1 (k=3 nahi mila)
+→ call inorder(NULL) → return
+✅ Inorder so far = [1]
+Back to 2
+Visit 2: count=2 (still not equal to k=3)
+→ call inorder(NULL) → return
+
+✅ Inorder so far = [1, 2]
+Back to 3
+Visit 3: count=3 🎯 Match ho gaya!
+→ res = 3 store
+→ return kar do
+✅ Answer = 3
+
+🔹 Intuition in Short
+BST ka inorder = sorted list
+Count chalate jao
+Jab count == k ho → wahi answer hai
+
+TC: O(n) (worst), O(k) (average)
+SC: O(h) → where h is tree height (between log n and n)
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+    int count = 0; // kitne nodes visit kiye hai
+    int ans;       // answer store karega
+
+    void inorder(TreeNode* node, int k) {
+        if (!node) return;  // agar node NULL hai to wapas aao
+
+        inorder(node->left, k); // left side traverse karo
+
+        count++;  // ek node visit ho gaya
+        if (count == k) {  // agar ye kth node hai
+            ans = node->val;  // answer store karo
+            return;           // return kar do (further traversal ki need nahi)
+        }
+
+        inorder(node->right, k); // right side traverse karo
+    }
+
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        inorder(root, k);
+        return ans;
+    }
+};
