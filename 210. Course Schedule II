@@ -1,0 +1,118 @@
+🔹 Problem ko samajhte hain:
+Aapke paas numCourses courses hain (0 se numCourses-1 tak).
+prerequisites diya hai: agar [a, b] diya hai → iska matlab hai course a lene se pehle course b complete karna zaroori hai.
+Aapko valid course order nikalna hai jisme sab prerequisites satisfy ho jaaye.
+Agar cycle ho jaaye (jaise ek dusre pe depend karte rahenge endlessly) → to empty array return karna hai.
+
+🔹 Intuition (Kya karna hai aur kaise sochna hai):
+Ye problem ek Directed Graph banati hai jisme:
+Nodes = courses
+Edges = dependency (b → a)
+Example: numCourses = 4
+prerequisites = [[1,0],[2,0],[3,1],[3,2]]
+Graph:
+0 → 1
+0 → 2
+1 → 3
+2 → 3
+Ab hume ek aisa order chahiye jisme pehle prerequisites aaye, baad me dependent course.
+👉 Ye exactly Topological Sort ka case hai.
+
+🔹 Kaise solve karenge? (Approach)
+2 Methods hai Topological Sort ke liye:
+Kahn’s Algorithm (BFS using Indegree)
+DFS + Stack
+Main tumhe Kahn’s Algorithm (BFS) batata hoon kyunki ye exam/DSA interviews me jyada samajhne layak hota hai.
+
+🔹 Kahn’s Algorithm (BFS Intuition):
+Har course ka indegree nikal lo (kitne prerequisites chahiye us course ke liye).
+Example: course 1 ke liye agar [1,0] hai → matlab indegree[1]++ hoga.
+Jis course ka indegree = 0 hai → wo turant start kar sakte ho. Unko queue me daalo.
+Queue se ek ek karke course nikalte jao:
+Uske dependent courses ka indegree reduce kar do (kyunki prerequisite complete ho gaya).
+Agar kisi ka indegree 0 ho gaya to usko bhi queue me daal do.
+Jo order me courses niklenge → wahi ek valid course order hoga.
+Agar sab courses process ho gaye → order return karo, warna [] return karo (cycle case).
+
+🔹 DFS + Stack Approach (Intuition)
+
+Har course ko ek graph node maan lo.
+DFS traversal se post-order me nodes ko stack me daalenge.
+Matlab: pehle prerequisites visit karenge, phir course ko stack me daalenge.
+Isse naturally ek valid topological order banega.
+Agar DFS ke dauraan koi node recur stack me dobara dikhe → iska matlab cycle hai → empty array return karenge.
+
+🔹 DFS me 3 states track karte hain:
+0 = not visited
+1 = visiting (abhi DFS stack me hai)
+2 = visited (completely processed ho chuka hai)
+🔹 Steps:
+Graph banate hain adjacency list se.
+Har node pe DFS call karo agar wo visit nahi hua hai.
+DFS me:
+Agar node visiting state me mil jaye → cycle hai (return false).
+Agar node already visited hai → ignore karo.
+Nahi to usko visiting mark karo aur uske neighbors pe DFS call karo.
+Sab complete ho gaye → node ko visited mark karke stack/order me daal do.
+Agar cycle detect nahi hua → stack ke reverse ko return kar do (topological order).
+
+🔹 Dry Run (Example 2)
+numCourses = 4
+prerequisites = [[1,0],[2,0],[3,1],[3,2]]
+
+Graph:
+
+0 → [1, 2]
+1 → [3]
+2 → [3]
+3 → []
+
+DFS traversal:
+Start 0 → goes to 1 → goes to 3 → 3 processed → push 3
+Back to 1 → push 1
+Back to 0 → goes to 2 → goes to 3 (already visited) → push 2
+Finally push 0
+Stack (postorder): [3,1,2,0]
+Reverse → [0,2,1,3] ✅ valid order
+
+Time: O(V + E)
+Space: O(V + E) (graph + recursion stack + state array)
+
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+         vector<vector<int>> adj(numCourses);
+        for (auto &pre : prerequisites) {
+            adj[pre[1]].push_back(pre[0]);
+        }
+
+        vector<int> state(numCourses, 0); // 0 = not visited, 1 = visiting, 2 = visited
+        vector<int> order;
+        bool hasCycle = false;
+
+        function<void(int)> dfs = [&](int node) {
+            if (hasCycle) return;
+
+            state[node] = 1; // mark as visiting
+            for (int next : adj[node]) {
+                if (state[next] == 0) {
+                    dfs(next);
+                } else if (state[next] == 1) {
+                    hasCycle = true; // cycle detected
+                }
+            }
+            state[node] = 2; // mark as visited
+            order.push_back(node); // add to order
+        };
+
+        for (int i = 0; i < numCourses; i++) {
+            if (state[i] == 0) {
+                dfs(i);
+            }
+        }
+
+        if (hasCycle) return {};
+        reverse(order.begin(), order.end());
+        return order;
+    }
+};
