@@ -1,0 +1,95 @@
+🔹 Problem samajhna
+Hume ek Trie (Prefix Tree) implement karna hai jo basically ek tree-like data structure hota hai jisme strings store hote hain letter by letter.
+Trie ke andar teen main function honge:
+insert(word) → ek word insert karo.
+search(word) → poora word hai ya nahi check karo.
+startsWith(prefix) → koi word hai jo is prefix se start hota hai ya nahi check karo.
+
+🔹 Intuition (Trie ka structure kaisa hota hai?)
+Har node ke andar 26 children pointers (a–z) ho sakte hain.
+Ek boolean flag (isEnd) rakhenge jo batayega ki ye node ek complete word ka end hai ya nahi.
+
+🔹 Operations
+1. Insert(word)
+Root se start karna hai.
+Har character ke liye check karo:
+Agar child exist nahi karta → naya node banao.
+Move to child.
+Last character pe isEnd = true.
+
+2. Search(word)
+Root se har character ke through traverse karo.
+Agar beech me child missing mila → return false.
+Agar last character ke node ka isEnd = true hai → return true.
+
+3. startsWith(prefix)
+Root se prefix ke har character traverse karo.
+Agar beech me child missing mila → return false.
+Agar prefix ke end tak pohonch gaye → return true (isEnd check karne ki need nahi).
+
+insert: O(L) (L = word length)
+Search: O(L)
+startsWith: O(P) (P = prefix length)
+Space: O(N * 26) worst case (N = total characters of all words).
+
+class Trie {
+public:
+    struct trieNode { // trinoode ke har node kis tarah ka hoga
+        trieNode *children[26]; 
+        bool isEndOfWord; 
+    };
+    
+    trieNode* getNode() { // ye function trienode create karkek dega
+        trieNode* newNode = new trieNode();
+        newNode->isEndOfWord = false;
+        
+        for (int i = 0; i < 26; i++) {
+			newNode->children[i] = NULL;
+		}
+        return newNode;
+    }
+        trieNode* root; // 1 root node to hogi hi jo ye hai 
+
+    Trie() {                       
+        root = getNode(); 
+    }
+    
+    void insert(string word) {
+        trieNode *crawler = root; 
+        
+        for (int i = 0; i < word.length(); i++) { 
+            int index = word[i] - 'a'; 
+            if (!crawler->children[index]) 
+                crawler->children[index] = getNode();
+            crawler = crawler->children[index]; 
+        }
+        crawler->isEndOfWord = true; 
+    }
+    
+    bool search(string word) {
+        trieNode *crawler = root; 
+        
+        for (int i = 0; i < word.length(); i++) { 
+            int index = word[i] - 'a'; 
+            if (!crawler->children[index]) 
+                return false; 
+            crawler = crawler->children[index]; 
+        }
+        return (crawler != NULL && crawler->isEndOfWord); 
+    }
+    
+    bool startsWith(string prefix) {
+      trieNode *crawler = root;
+        int i = 0;
+        for (i = 0; i < prefix.length(); i++) { 
+            int index = prefix[i] - 'a'; 
+            
+            if (!crawler->children[index]) 
+                return false; 
+            crawler = crawler->children[index]; 
+        }
+        if(i==prefix.length())
+            return true;
+        return false;  
+    }
+};
