@@ -1,0 +1,78 @@
+🔹 Problem Statement (Simple Words me)
+Aapko ek undirected graph diya gaya hai.
+Graph initially tree (n nodes + n-1 edges) hai, par ek extra edge add kar di gayi hai → isliye ab ek cycle ban gaya hai.
+Hume woh extra edge (redundant edge) nikalni hai jo remove karne pe graph fir se ek valid tree ban jaye.
+Agar multiple answers possible hai to last wali edge (input order ke hisaab se) return karni hai.
+
+🔹 Example Input: edges = [[1,2], [1,3], [2,3]]
+Graph connections:
+1 - 2
+ \ |
+   3
+
+Cycle = 1 - 2 - 3 - 1
+Extra edge = [2,3]
+Output: [2,3]
+
+🔹 Approaches
+1️⃣ Union-Find (Disjoint Set Union - DSU)
+Idea: Agar 2 nodes already connected hai aur fir ek edge aata hai jo unko fir se connect karna chahta hai → woh cycle banayega → wahi redundant edge hai.
+
+Steps: Initialize DSU (parent array).
+For each edge (u,v): Check agar u aur v already connected hai → return (u,v). Otherwise union kar do.
+
+🔹 Dry Run (edges = [[1,2], [1,3], [2,3]])
+Initial parent = [0,1,2,3]   (self parent)
+Edge (1,2)
+find(1)=1, find(2)=2 → different → union → parent[1]=2
+parent = [0,2,2,3]
+Edge (1,3)
+find(1)=2, find(3)=3 → different → union → parent[2]=3
+parent = [0,2,3,3]
+Edge (2,3)
+find(2)=3, find(3)=3 → SAME → cycle found → return [2,3].
+✅ Answer = [2,3]
+
+Time Complexity: O(N * α(N)) ≈ O(N) (DSU almost constant time)
+Space Complexity: O(N) (parent array)
+
+class Solution {
+public:
+    // Parent array banate hain har node ka representative store karne ke liye
+    vector<int> parent;
+
+    // Find function: ye kisi node ka ultimate parent (representative) dhoondta hai
+    int find(int x) {
+        // Agar current node ka parent wo khud nahi hai
+        if (parent[x] != x)
+            // Path compression: directly root parent se connect kar do
+            parent[x] = find(parent[x]); 
+        return parent[x]; // Root parent return karega
+    }
+
+    // Union function: do nodes ko ek hi set me jodne ke liye
+    bool unionSet(int u, int v) {
+        int pu = find(u); // u ka parent nikalo
+        int pv = find(v); // v ka parent nikalo
+        if (pu == pv) return false; // Agar dono ka parent same hai -> cycle ban gaya
+        parent[pu] = pv; // Warna u ka parent ko v ke parent ke saath jod do
+        return true; // Successfully merge kar diya
+    }
+
+    // Main function jo redundant connection dhoondhega
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        int n = edges.size(); // Total edges ka size (graph me nodes ka count bhi yahi hoga)
+        parent.resize(n + 1); // Parent array resize karna (1-based indexing ke liye +1)
+        
+        // Initially har node apna khud ka parent hai
+        for (int i = 1; i <= n; i++) parent[i] = i;
+
+        // Har edge ko process karte hain
+        for (auto& edge : edges) {
+            int u = edge[0], v = edge[1]; // Edge ke dono nodes nikalo
+            if (!unionSet(u, v)) // Agar unionSet false return kare to matlab cycle ban gaya
+                return edge; // Ye edge redundant hai, isko return kar do
+        }
+        return {}; // Agar koi redundant edge nahi mili to empty vector return
+    }
+};
