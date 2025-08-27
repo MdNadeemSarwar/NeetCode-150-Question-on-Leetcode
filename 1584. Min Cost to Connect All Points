@@ -1,0 +1,148 @@
+Step-by-Step Approach: Graph Model
+Har point ek node hai.Do nodes ke beech edge weight = Manhattan distance.
+Tumhe MST ka cost chahiye.
+Algorithms Use Kar Sakte Ho: Prim’s Algorithm (better here, kyunki dense graph hai).
+Kruskal’s Algorithm (bhi chalega but O(E log E), aur E ≈ n² ho jayega).
+n ≤ 1000 hai → n² = 10⁶ → manageable.
+Prim’s Algorithm Approach (Efficient for this Q)
+Start karo kisi ek node se.
+Har step pe: minimum edge choose karo jo MST me add kar sake.
+Priority queue (min-heap) use karke implement karenge.
+
+points = [[0,0],[2,2],[3,10],[5,2],[7,0]]
+Hum Prim’s Algorithm use kar rahe hain.
+Target = MST banake minimum cost find karna.
+
+Step 0 – Basic Setup
+inMST[n] → bool array (track karenge kaun nodes MST me aa chuka hai).
+Start with node 0 (point [0,0]) with cost 0.
+pq = { (0,0) } (priority queue → {edgeWeight, node}).
+edgesUsed = 0, cost = 0.
+
+Step 1 – Take first node
+Pop (0,0) → node 0.
+Already not in MST → include karo.
+inMST[0] = true.
+edgesUsed = 1, cost = 0 + 0 = 0.
+Now add its edges (distances) to all other nodes:
+
+Copy code
+dist(0,[0,0] → [2,2]) = |0-2| + |0-2| = 4
+dist(0,[0,0] → [3,10]) = |0-3| + |0-10| = 13
+dist(0,[0,0] → [5,2]) = |0-5| + |0-2| = 7
+dist(0,[0,0] → [7,0]) = |0-7| + |0-0| = 7
+PQ me daal do:
+
+ini
+Copy code
+pq = { (4,1), (13,2), (7,3), (7,4) }
+Step 2 – Next minimum edge
+Pop (4,1) → node 1.
+Add to MST → inMST[1] = true.
+edgesUsed = 2, cost = 0 + 4 = 4.
+Now push edges from node 1 to others not in MST:
+
+Copy code
+dist([2,2] → [3,10]) = |2-3| + |2-10| = 9
+dist([2,2] → [5,2]) = |2-5| + |2-2| = 3
+dist([2,2] → [7,0]) = |2-7| + |2-0| = 7
+Update pq:
+
+pq = { (3,3), (7,3), (7,4), (13,2), (9,2), (7,4) }
+(min-heap maintain hota hai)
+
+Step 3 – Next minimum
+Pop (3,3) → node 3 (point [5,2]).
+Add MST → inMST[3] = true.
+edgesUsed = 3, cost = 4 + 3 = 7.
+Add neighbors:
+
+dist([5,2] → [3,10]) = 10
+dist([5,2] → [7,0]) = 4
+PQ update:
+
+pq = { (4,4), (7,3), (7,4), (13,2), (9,2), (7,4), (10,2) }
+Step 4 – Next minimum
+Pop (4,4) → node 4 (point [7,0]).
+Add MST → inMST[4] = true.
+edgesUsed = 4, cost = 7 + 4 = 11.
+Add neighbors:
+
+dist([7,0] → [3,10]) = 14
+PQ update:
+
+pq = { (7,3), (7,4), (13,2), (9,2), (7,4), (10,2), (14,2) }
+Step 5 – Next minimum
+Pop (7,3) → but node 3 already in MST → skip.
+Pop (7,4) → node 4 already in MST → skip.
+Pop (9,2) → node 2 (point [3,10]).
+Add MST → inMST[2] = true.
+edgesUsed = 5, cost = 11 + 9 = 20.
+All 5 nodes included (edgesUsed == n). STOP.
+Final Answer:
+cost = 20
+
+Visual MST Edges:
+(0 → 1) cost 4
+(1 → 3) cost 3
+(3 → 4) cost 4
+(1 → 2) cost 9
+Total = 20
+
+Time Complexity = O(n² log n)
+Space Complexity = O(n)
+
+
+class Solution {
+public:
+    int minCostConnectPoints(vector<vector<int>>& points) {
+        int n = points.size();  
+        // total number of points (nodes) in graph
+        
+        vector<bool> inMST(n, false);  
+        // ye array track karega ki kaunsa node MST me already include ho chuka hai (true = included)
+        
+        int edgesUsed = 0;  
+        // kitne nodes (edges use karke) hum MST me add kar chuke hain
+        int cost = 0;       
+        // final MST ka total cost store karne ke liye
+        
+        // Min-heap (priority_queue) banaya jisme pair<weight, node> store karenge
+        // weight = edge cost (Manhattan distance), node = destination point
+        priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;
+        
+        // Starting node (0th point) ko MST me lene ke liye heap me push kar do
+        // iska cost 0 rakha kyunki ye starting hai (like Prim’s algo ka start)
+        pq.push({0, 0});  
+        
+        // Jab tak sabhi nodes MST me nahi aa jaate (n nodes total hain)
+        while (edgesUsed < n) {
+            // heap se sabse chhota edge nikalo
+            auto [w, u] = pq.top();  
+            pq.pop();
+            
+            // agar ye node pehle hi MST me hai, skip kar do
+            if (inMST[u]) continue; 
+            
+            // agar node MST me nahi hai → ab add karenge
+            inMST[u] = true;   // mark included
+            cost += w;         // MST ke cost me is edge ka weight add kar do
+            edgesUsed++;       // ek aur node MST me add ho gaya
+            
+            // ab is naye node ke through baaki nodes ke distances calculate kar ke heap me daalenge
+            for (int v = 0; v < n; v++) {
+                if (!inMST[v]) { // sirf unhi nodes ke liye jo abhi MST me nahi hai
+                    // Manhattan distance calculate karo (edge weight)
+                    int dist = abs(points[u][0] - points[v][0]) 
+                             + abs(points[u][1] - points[v][1]);
+                    
+                    // heap me {distance, node} push kar do
+                    pq.push({dist, v});
+                }
+            }
+        }
+        
+        // jab sabhi nodes MST me aa jaate hain, return total cost
+        return cost;
+    }
+};
