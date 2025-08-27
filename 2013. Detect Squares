@@ -1,0 +1,108 @@
+📌 Question Understanding
+Aapko ek class banani hai DetectSquares jisme teen main kaam karne hain:
+add(point)
+→ ek point (x, y) add karna hai data structure me. Multiple same points ho sakte hain, unko bhi count karna hai.
+count(point)
+→ ek point (x, y) diya hoga. Aapko dekhna hai kitne axis-aligned squares ban sakte hain jisme ye (x, y) ek corner ho.
+Square axis-aligned matlab uske sides X-axis aur Y-axis ke parallel hone chahiye.
+👉 Example: add(3,10), add(11,2), add(3,2)
+count(11,10) → 1 milega kyunki ek square exist karta hai with points:
+(11,10) ← query point
+(11,2)
+(3,10)
+(3,2)
+
+📌 Approach ko samajhte hain
+Aapko 2 cheezon ka dhyaan rakhna hoga:
+Point storage:
+Jab bhi point add karenge, hume usko ek counter me store karna hai.
+Kyonki ek hi point multiple times add ho sakta hai.
+Matlab ek dictionary/hashtable banaenge cnt[x][y] = count.
+Square banane ka logic (count method):
+Query point fix hoga, maan lo (qx, qy).
+Ab square banane ke liye:
+Hume same row (same y) wale x points dhoondhne honge.
+Ya phir same column (same x) wale y points dhoondhne honge.
+Square banane ke liye:
+Side length = |qx - x| = |qy - y|
+Hume dekhna padega ki diagonally opposite points exist karte hain ya nahi.
+
+📌 Step by Step Dry Run
+Example:
+add(3,10)
+add(11,2)
+add(3,2)
+count(11,10)
+
+Step 1: Storage
+cnt[3][10] = 1
+cnt[11][2] = 1
+cnt[3][2] = 1
+
+Step 2: Query → count(11,10)
+Query point = (11,10)
+Check all points with same x = 11 → (11,2)
+Side = |qy - y| = |10 - 2| = 8
+Matlab possible other x = 11 ± 8 → x = 3 or x = 19
+Case 1: x = 3
+
+Check points:
+(3,10) → exist? ✅ cnt[3][10] = 1
+(3,2) → exist? ✅ cnt[3][2] = 1
+Square ban gaya → count = 1
+Case 2: x = 19
+Check points:
+
+(19,10) → exist? ❌
+(19,2) → exist? ❌
+
+No square. 👉 Final Answer = 1
+
+📌 Why code uses nested map/dict?
+Because we need fast access → cnt[x][y]
+Agar multiple times add hua, toh count bhi store ho sake.
+Square count karte waqt multiplication hota hai (cnt[point1] * cnt[point2]) kyunki ek hi coordinate multiple times add ho sakta hai.
+
+Overall TC:
+Add → O(1)
+Count → O(N)
+SC: O(N)
+
+class DetectSquares {
+public:
+    // map of maps -> cnt[x][y] = frequency of point (x,y)
+    unordered_map<int, unordered_map<int,int>> cnt;
+    
+    // add new point
+    void add(vector<int> point) {
+        int x = point[0], y = point[1];
+        cnt[x][y]++;  // increase frequency
+    }
+
+    // count number of squares using query point
+    int count(vector<int> point) {
+        int x = point[0], y = point[1];
+        int res = 0;
+        
+        // iterate over all points with same x (same column)
+        for (auto& [colY, freq] : cnt[x]) {
+            if (colY == y) continue; // skip same point
+            
+            int side = colY - y; // possible side length
+            
+            // check 2 horizontal possibilities (left & right)
+            // 1. right side: (x+side, y), (x+side, colY)
+            int x2 = x + side;
+            if (cnt.count(x2)) {
+                res += freq * cnt[x2][y] * cnt[x2][colY];
+            }
+
+            // 2. left side: (x-side, y), (x-side, colY)
+            x2 = x - side;
+            if (cnt.count(x2)) {
+                res += freq * cnt[x2][y] * cnt[x2][colY];
+            }
+        }
+        return res;
+    }
+};
