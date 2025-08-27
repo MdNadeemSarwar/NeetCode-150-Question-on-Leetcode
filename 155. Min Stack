@@ -1,0 +1,88 @@
+Hume ek stack banana hai jo normal stack ki tarah push, pop, top kare,
+lekin saath hi saath hume ek aur extra operation karna hai → getMin() jo hamesha stack me se minimum element O(1) time me return kare.
+
+Observations
+Agar hum sirf ek normal stack use kare → to min nikalne ke liye har bar pura stack traverse karna padega → O(n).
+Question bol raha hai → har operation O(1) hona chahiye.
+Matlab hume extra data structure ka use karna hoga.
+
+Approach / Intuition 🔑 Trick yeh hai:
+Hum ek extra stack rakhenge (minStack) jo har position pe uss time ka current minimum store karega.
+Jab bhi hum ek naya element push kare:
+Normal stack me element daalo.
+MinStack me min(val, currentMin) push karo.
+Jab pop kare:
+Dono stack se pop karo.
+Jab top() kare:
+Normal stack ka top return karo.
+Jab getMin() kare:
+MinStack ka top return karo (kyunki usme hamesha current minimum pada hai).
+
+Step by Step Algorithm
+Do stacks banao: st (normal values) aur minSt (minimum values).
+push(val)
+st.push(val)
+Agar minSt empty hai → minSt.push(val)
+warna minSt.push(min(val, minSt.top()))
+pop()
+st.pop(), minSt.pop()
+top()
+return st.top()
+getMin()
+return minSt.top()
+
+Dry Run
+Example: push(-2), push(0), push(-3)
+push(-2):
+st = [-2]
+minSt = [-2]
+push(0):
+st = [-2,0]
+minSt = [-2, min(-2,0)=-2] → [-2,-2]
+push(-3):
+st = [-2,0,-3]
+minSt = [-2,-2, min(-2,-3)=-3] → [-2,-2,-3]
+Now getMin() = top of minSt = -3 ✅
+pop(): st.pop() → [-2,0], minSt.pop() → [-2,-2]
+top() = st.top() = 0
+getMin() = minSt.top() = -2 ✅
+
+Time & Space Complexity
+Push: O(1)
+Pop: O(1)
+Top: O(1)
+getMin: O(1)
+Space Complexity: O(n) (kyunki extra stack use kar rahe hai, size same as normal stack)
+
+class MinStack {
+public:
+    stack<int> st; // normal stack
+    stack<int>minst; // stack to store current minimum
+
+    MinStack() {
+        
+    }
+    
+    void push(int val) {
+        st.push(val);
+        if(minst.empty()){// agar minSt empty hai to directly val daalo
+            minst.push(val);
+        }
+        else{ // current min = min(val, minSt.top())
+            minst.push(min(minst.top(), val));
+        }
+    }
+    
+    void pop() {
+        st.pop();
+        minst.pop();
+    }
+    
+    int top() {
+        return st.top();
+    }
+    
+    int getMin() {
+        return minst.top();
+    }
+};
