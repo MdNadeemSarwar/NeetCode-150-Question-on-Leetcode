@@ -1,0 +1,99 @@
+Hume ek graph diya gaya hai (undirected, connected). Har node ke paas: val (unique integer value) neighbors (adjacent nodes ki list)
+Task: is graph ka deep copy banana hai. Deep copy ka matlab: ek naya graph jisme nodes alag memory me banaye gaye ho, lekin structure (connections) bilkul same ho jaaye.
+Example Input adjacency list: [[2,4],[1,3],[2,4],[1,3]]
+Graph structure:
+1 -- 2
+|    |
+4 -- 3
+Output adjacency list (cloned graph): [[2,4],[1,3],[2,4],[1,3]]
+Matlab graph structure same hai, lekin naye nodes ban gaye hain.
+
+Observations
+Agar hum simple traverse karke naye nodes banaye bina check kiye → infinite loop ban jayega (kyunki graph me cycle ho sakta hai).
+Isliye hume ek map (oldNode → newNode) maintain karna hoga, jisme store karenge ki kaunse node ka clone ban chuka hai.
+Graph ko traverse karne ke liye hum DFS ya BFS dono use kar sakte hain.
+
+Approach / Intuition
+Ek hash map rakho: unordered_map<Node*, Node*> mp;
+Jab bhi ek node ka clone banana ho:
+Agar node already map me hai → return karo (uska clone already bana hua hai).
+Warna ek naya node banao → map me store karo → uske neighbors recursively clone karke add karo.
+Is tarah DFS karte hue pura graph clone ho jaayega.
+
+Step by Step Algorithm
+Agar input node == NULL hai → return NULL.
+Agar node already map me hai → directly uska clone return karo.
+Warna ek naya node banao (new Node(node->val)).
+Map me dal do: mp[node] = newNode.
+Node ke har neighbor ke liye:
+us neighbor ko recursively clone karo
+naye node ke neighbors me add karo.
+Return cloned node.
+
+Dry Run
+Graph: 1--2--3--4--1 (square graph)
+Start from node 1.
+node 1 ka clone banao (val=1). mp[1] = 1'.
+Ab neighbor 2 pe jao.
+node 2 ka clone banao (val=2). mp[2] = 2'.
+neighbor 1 already cloned → return mp[1].
+neighbor 3 clone banao (val=3). mp[3] = 3'.
+neighbor 2 already cloned → return mp[2].
+neighbor 4 clone banao (val=4). mp[4] = 4'.
+neighbor 1 already cloned → return mp[1].
+neighbor 3 already cloned → return mp[3].
+Sab connect ho gaya, final graph clone ready.
+
+Time Complexity: O(N + E)
+N = number of nodes
+E = number of edges
+Har node aur har edge ek bar visit hota hai.
+Space Complexity: O(N)
+Map me har node ka ek entry hai.
+Plus recursion stack O(N).
+
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> neighbors;
+    Node() {
+        val = 0;
+        neighbors = vector<Node*>();
+    }
+    Node(int _val) {
+        val = _val;
+        neighbors = vector<Node*>();
+    }
+    Node(int _val, vector<Node*> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+};
+*/
+
+class Solution {
+public:
+
+    unordered_map<Node*, Node*>map; // oldNode -> newNode mapping
+
+    Node* cloneGraph(Node* node) {
+
+        if(node == NULL){
+            return NULL;
+        }
+        // agar node ka clone already exist karta hai
+        if(map.find(node) != map.end()){ 
+            return map[node];
+        }
+
+        Node* clonenode = new Node(node->val);  // naya node banao
+        map[node] = clonenode; // map me store karo
+
+        for(auto neighbor: node->neighbors){ // ab neighbors clone karo
+            clonenode->neighbors.push_back(cloneGraph(neighbor));
+        }
+        return clonenode;
+    }
+};
