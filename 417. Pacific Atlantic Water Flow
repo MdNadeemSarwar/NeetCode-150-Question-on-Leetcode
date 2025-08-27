@@ -1,0 +1,110 @@
+🔹 1. Problem ko simple words me samajho:
+Hume ek m x n grid diya hai (matrix of heights).
+Water flow rule: Paani ek cell se uske neighbors (up, down, left, right) me flow kar sakta hai agar neighbor ka height ≤ current cell ka height (yaani paani neeche ya barabar height pe jaa sakta hai).
+Pacific Ocean → grid ke top row aur left column se connected hai.
+Atlantic Ocean → grid ke bottom row aur right column se connected hai.
+👉 Hume un saare cells ka list return karna hai jahan se paani dono oceans tak jaa sakta hai.
+
+🔹 2. Example: Matrix:
+heights = 
+[
+ [1, 2, 2, 3, 5],
+ [3, 2, 3, 4, 4],
+ [2, 4, 5, 3, 1],
+ [6, 7, 1, 4, 5],
+ [5, 1, 1, 2, 4]
+]
+
+Cell [0,4] = 5:
+Top row pe hai → Pacific reach
+Rightmost column pe hai → Atlantic reach
+✅ So [0,4] answer me aayega
+Cell [3,0] = 6:
+Leftmost column → Pacific reach
+Niche jaa sakta hai [4,0] → Atlantic reach
+✅ So [3,0] bhi answer me
+Aur aise hi baaki.
+
+🔹 3. Observations / Intuition:
+Agar hum har cell se check karna chahe ki "ye dono oceans tak jaa sakta hai ya nahi", toh bahut costly ho jaayega (har cell se DFS/BFS chalana). ❌
+👉 Trick: Reverse thinking
+Instead of checking har cell → ocean, hum ocean se andar ki taraf chalenge.
+Ek DFS/BFS Pacific se karenge (jo cells Pacific tak pahunch sakte hain).
+Ek DFS/BFS Atlantic se karenge (jo cells Atlantic tak pahunch sakte hain).
+Answer = dono visited sets ka intersection.
+
+🔹 4. Algorithm (Step by Step):
+Banado 2 boolean grids: pacific[m][n], atlantic[m][n]
+Pacific DFS/BFS start points: top row + left column
+Atlantic DFS/BFS start points: bottom row + right column
+DFS/BFS ka rule:
+Move to neighbor agar neighbor_height >= current_height (kyunki paani upar se neeche jaata hai, lekin reverse traversal me hume ulta condition lagana padega).
+Mark visited.
+Pacific aur Atlantic dono ke visited cells ke intersection return kar do.
+
+Complexity:
+Har cell max 1 baar visit hota hai per ocean → O(m*n)
+DFS recursion depth max O(m*n)
+Space:
+Visited arrays = O(m*n)
+Recursion stack = O(m*n) worst case
+✅ Total: Time = O(mn), Space = O(mn)
+
+class Solution {
+public:
+    int m, n; // matrix ke rows (m) aur cols (n) store karne ke liye
+    // 4 directions define kiye gaye hai (up, down, left, right)
+    vector<vector<int>> dirs = {{1,0},{-1,0},{0,1},{0,-1}};
+
+    // DFS function: ek ocean se shuru karke un cells tak traverse karna
+    // jahan paani flow kar sakta hai (reverse thinking)
+    void dfs(vector<vector<int>>& heights, vector<vector<bool>>& ocean, int r, int c) {
+        ocean[r][c] = true; // current cell ko mark kar do ki ye ocean tak reach kar sakta hai
+
+        // 4 directions me check karenge
+        for (auto d : dirs) {
+            int nr = r + d[0], nc = c + d[1]; // neighbor ka row aur col nikal lo
+
+            // agar neighbor matrix ke bahar chala gaya toh skip
+            if (nr < 0 || nr >= m || nc < 0 || nc >= n) continue;
+
+            // move sirf tab karenge agar:
+            // 1. wo neighbor abhi tak visit nahi hua hai
+            // 2. neighbor ka height >= current height (reverse flow logic)
+            if (!ocean[nr][nc] && heights[nr][nc] >= heights[r][c]) {
+                dfs(heights, ocean, nr, nc); // DFS call neighbor pe
+            }
+        }
+    }
+
+    vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {
+        m = heights.size();      // total rows
+        n = heights[0].size();   // total cols
+
+        // 2 visited arrays banayenge: pacific aur atlantic ke liye
+        vector<vector<bool>> pacific(m, vector<bool>(n, false));
+        vector<vector<bool>> atlantic(m, vector<bool>(n, false));
+
+        // ✅ Pacific ke liye DFS calls (top row + left column)
+        for (int c = 0; c < n; c++) dfs(heights, pacific, 0, c);  // top row
+        for (int r = 0; r < m; r++) dfs(heights, pacific, r, 0);  // left column
+
+        // ✅ Atlantic ke liye DFS calls (bottom row + right column)
+        for (int c = 0; c < n; c++) dfs(heights, atlantic, m-1, c); // bottom row
+        for (int r = 0; r < m; r++) dfs(heights, atlantic, r, n-1); // right column
+
+        vector<vector<int>> result; // final answer store karne ke liye
+
+        // ✅ dono visited arrays ka intersection nikalenge
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                // agar ek cell dono oceans tak reach kar sakta hai
+                if (pacific[r][c] && atlantic[r][c]) {
+                    result.push_back({r,c}); // answer me add karo
+                }
+            }
+        }
+
+        return result; // final list of coordinates return karo
+    }
+};
