@@ -1,0 +1,126 @@
+🔴 Problem samajhna
+Aapko ek n x n chessboard diya hai aur usme aapko n queens aise place karni hain ki koi bhi do queens ek dusre ko attack na kare.
+Chessboard me queen attack karti hai:
+Same row
+Same column
+Diagonal (donon taraf)
+Aur aapko sab possible configurations return karne hain.
+
+🔴 Intuition
+Har row me sirf ek queen place hogi (kyunki agar ek hi row me 2 queens ho gayi to woh attack karengi).
+Matlab agar board ka size n hai to n rows hain aur n queens place karni hain.
+Har row me decide karna hai ki kis column me queen rakhi jaaye.
+Agar safe hai to queen rakho, aur next row par chale jao (recursion).
+Agar end tak pohch gaye (sab rows fill ho gayi) to ek valid solution mil gaya.
+Yani ye ek backtracking problem hai.
+
+🔴 Approach (Step by Step)
+Row by Row place karna – pehle row 0, fir row 1, fir row 2 …
+Har row me loop chalayenge sare columns par aur check karenge ki column safe hai ya nahi.
+Agar safe hai:
+Queen rakho
+Next row ke liye recursion call karo
+Agar recursion se valid solution mila, usse store kar lo
+Backtrack karke queen hata do (kyunki hume aur configurations bhi dekhne hain).
+Agar last row tak pahunch gaye to board ka ek solution ban gaya.
+
+🔴 Safety Check (Queen place kar sakte hain ya nahi?)
+Jab row r aur column c me queen rakheni hai, to check karna padega:
+Same column me koi queen hai ya nahi.
+Left diagonal me koi queen hai ya nahi.
+Right diagonal me koi queen hai ya nahi.
+Row check karne ki zarurat nahi hai, kyunki har row me sirf ek queen rakhi ja rahi hai.
+
+🔴 Dry Run (n=4)
+Board initially empty:
+. . . .
+. . . .
+. . . .
+. . . .
+
+Row 0 → col 0 pe rakho → safe ✅
+Row 1 → col 0 ❌ (same column), col 1 ❌ (left diagonal), col 2 ✅ → rakho
+Row 2 → col 0 ❌, col 1 ❌, col 2 ❌, col 3 ✅ → rakho
+Row 3 → ab koi column safe nahi → ❌ → backtrack karo
+Backtrack karke aur possibilities try karte rahenge → finally 2 solutions milte hain.
+
+🔴 Complexity Analysis
+Har row me hum n choices try karte hain → worst case O(n^n) possibilities.
+Lekin safety check O(n) time leta hai har placement ke liye.
+So Time Complexity ≈ O(n!) (kyunki ek valid arrangement queen ke permutation ke jaisa hai).
+Space Complexity = O(n^2) (board store karne ke liye + recursion stack).
+
+1. isSafe function
+Yeh function check karta hai ki kya row, col pe queen rakhi ja sakti hai bina attack ke.
+Queen attack karti hai:
+same column
+left diagonal
+right diagonal
+👉 Matlab:
+Column check → upar ki rows me same column me queen to nahi hai?
+Left diagonal check → diagonally left upar queen hai kya?
+Right diagonal check → diagonally right upar queen hai kya?
+Agar sab safe → return true.
+
+2. solve function
+Ye backtracking ka main function hai jo row by row queens rakhta hai.
+👉 Matlab:
+Agar row == n → matlab sari queens safely place ho gayi → ek solution mil gaya.
+Har row me sare columns try karo.
+Agar safe hai → queen rakho, recursion se agli row solve karo.
+Jab return hoga to queen hata do (backtrack), taki agli possibilities check ki jaa sake.
+
+3. solveNQueens function
+👉 Matlab:
+Ek n×n empty board banaya jisme sab jagah . hai.
+Row 0 se queens place karna start karte hain.
+Jab sab solutions mil jayein, ans return karte hain.
+
+🔎 Intuition
+Har row me ek queen rakho.
+Safe jagah check karo (isSafe).
+Agar safe → queen rakho aur recursion me next row.
+Agar kahin fass gaye (no safe column) → backtrack karo.
+Last row tak pohch gaye → ek valid solution mil gaya.
+
+class Solution {
+public:
+    vector<vector<string>> ans;
+
+    bool isSafe(vector<string>& board, int row, int col, int n) {
+        // check column
+        for (int i = 0; i < row; i++)
+            if (board[i][col] == 'Q') return false;
+
+        // check left diagonal
+        for (int i=row-1, j=col-1; i>=0 && j>=0; i--, j--)
+            if (board[i][j] == 'Q') return false;
+
+        // check right diagonal
+        for (int i=row-1, j=col+1; i>=0 && j<n; i--, j++)
+            if (board[i][j] == 'Q') return false;
+
+        return true;
+    }
+
+    void solve(int row, int n, vector<string>& board) {
+        if (row == n) {  // all queens placed
+            ans.push_back(board);
+            return;
+        }
+
+        for (int col=0; col<n; col++) {
+            if (isSafe(board, row, col, n)) {
+                board[row][col] = 'Q';
+                solve(row+1, n, board);
+                board[row][col] = '.';  // backtrack
+            }
+        }
+    }
+
+    vector<vector<string>> solveNQueens(int n) {
+        vector<string> board(n, string(n, '.'));
+        solve(0, n, board);
+        return ans;
+    }
+};
