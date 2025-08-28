@@ -1,0 +1,173 @@
+Hume ek linked list diya hai. Har node ke paas do pointers hain:
+next → next node
+random → koi bhi random node list me, ya null
+Task: Is linked list ka ek deep copy banana hai.
+Matlab: ek nayi linked list banao jisme sabhi nodes naye banaye gaye ho (old wale pointer na ho). Aur next aur random dono exactly same tarike se kaam karein jaise original me tha.
+Example samajhna
+Input: head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+
+Matlab:
+Node0: val=7, random=null
+Node1: val=13, random=Node0
+Node2: val=11, random=Node4
+Node3: val=10, random=Node2
+Node4: val=1, random=Node0
+Output (deep copy):
+[[7,null],[13,0],[11,4],[10,2],[1,0]]
+
+👉 Structure same hai, but yeh naye nodes hone chahiye (different memory).
+🔹 2. Intuition
+Is problem ko solve karne ke liye hume ensure karna hai ki:
+Har original node ka ek copy node ho.
+Us copy ke next aur random pointers sahi jagah point karein (to other copy nodes, not old ones).
+Problem: random pointer kisi bhi node pe point kar sakta hai, isliye ek pass me karna mushkil hai.
+Solution idea:
+Use a mapping: originalNode -> copyNode.
+First pass: create copy of each node and store in map.
+Second pass: set next and random using map.
+
+✅ Approach 1: HashMap (simple & clear)
+First pass: traverse original list, create new nodes with same val, store in map:
+map[original] = copy.
+Second pass: for each original node,
+copy->next = map[original->next]
+copy->random = map[original->random]
+Finally return map[head].
+
+Time: O(n)
+Space: O(n) (map)
+
+✅ Approach 2: Interweaving (optimized, O(1) space)
+Original: A → B → C
+Convert: A → A' → B → B' → C → C' (copy node right after original).
+Set random: A'->random = A->random->next (kyunki copy uske side me hai).
+Split original aur copied list.
+
+Time: O(n)
+Space: O(1)
+
+🔹 4. Dry Run (Approach 1 – HashMap)
+Input: [ [1,1], [2,1] ]
+
+Step 1: Create copies
+Original1 (val=1) → Copy1 (val=1)
+Original2 (val=2) → Copy2 (val=2)
+Map: {O1→C1, O2→C2}
+
+Step 2: Fix pointers
+For O1: next=O2 → C1.next=C2, random=O2 → C1.random=C2
+For O2: next=null → C2.next=null, random=O2 → C2.random=C2
+Output: [ [1,1], [2,1] ] ✔
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APProach 1
+Time Complexity: O(n) (2 traversals of list)
+Space Complexity: O(n) (for hashmap)
+
+Node* copyRandomList(Node* head) {
+    // Agar original list khali hai to NULL return kar do
+    if(head == NULL){
+        return NULL;
+    }
+
+    // Ye map purane nodes ko naye nodes ke sath map karega
+    unordered_map<Node*, Node*> map;
+
+    Node* curr = head;      // current pointer original list me traverse karne ke liye
+    Node* prev = NULL;      // new list ke last node ko track karne ke liye
+    Node* newhead = NULL;   // new list ka head pointer
+
+    // --------- STEP 1: Pehle next pointers ke sath ek nayi list banani hai ---------
+    while(curr != NULL){
+        // Current node ke value se ek naya node banao
+        Node* temp = new Node(curr->val);
+
+        // Purane node ko naye node ke sath map kar do
+        map[curr] = temp;
+
+        // Agar new list abhi tak empty hai
+        if(newhead == NULL){
+            newhead = temp;   // first node ko newhead banao
+            prev = newhead;   // prev ko newhead pe set karo
+        }
+        else{
+            prev->next = temp;  // prev ka next new node banega
+            prev = temp;        // prev ko aage badhao
+        }
+
+        // Original list me aage badho
+        curr = curr->next;
+    }
+
+    // --------- STEP 2: Random pointers set karni hai ---------
+    curr = head;          // original list ka head
+    Node* newcurr = newhead;  // new list ka head
+
+    while(curr != NULL){
+        // Agar original node ka random NULL hai to new node ka bhi NULL hoga
+        if(curr->random == NULL){
+            newcurr->random = NULL;
+        }
+        else{
+            // Map ke through original random ka corresponding new node set karo
+            newcurr->random = map[curr->random];
+        }
+
+        // Dono lists me ek ek step aage badho
+        newcurr = newcurr->next;
+        curr = curr->next;
+    }
+
+    // Nayi deep copy list ka head return karo
+    return newhead;
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Time Complexity: O(n) (2 traversals of list)
+Space Complexity: O(1)
+
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        // Edge case: agar list hi empty hai
+        if(head == NULL){
+            return NULL;
+        }
+
+        Node* curr = head;
+
+        // STEP 1: Har original node ke baad uska copy insert karo
+        while(curr != NULL){ 
+            Node* forw = curr->next;                  // store next node
+            curr->next = new Node(curr->val);         // copy node banaya aur insert kiya
+            curr->next->next = forw;                  // copy node -> point to original next
+            curr = forw;                              // move to next original
+        }
+
+        // STEP 2: Har copy node ke random pointer set karo
+        curr = head;
+        while(curr != NULL && curr->next != NULL){
+            if(curr->random == NULL){
+                curr->next->random = NULL;            // agar original ka random NULL tha
+            }
+            else{
+                curr->next->random = curr->random->next; 
+                // original->random ka copy hamesha uske baad hota hai
+            }
+            curr = curr->next->next;                  // jump to next original node (skip copy)
+        }
+
+        // STEP 3: Ab dono lists ko alag karna (original restore + copy list return)
+        Node* newhead = head->next;                   // copy list ka head
+        Node* newcurr = newhead;
+        curr = head;
+
+        while(curr != NULL && newcurr != NULL){
+            curr->next = curr->next ? curr->next->next : NULL;      // original next restore
+            newcurr->next = newcurr->next ? newcurr->next->next : NULL; // copy next set
+            curr = curr->next;                                     // move to next original
+            newcurr = newcurr->next;                               // move to next copy
+        }
+
+        return newhead;   // final deep copied list ka head
+    }
+};
