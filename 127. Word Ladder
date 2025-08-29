@@ -1,0 +1,58 @@
+Question kya tha?
+Ek start word aur ek end word diya hai.
+Har step pe ek hi letter change kar sakte ho.
+Jo naya word banta hai, wo given word list me hona chahiye.
+Start word se end word tak sabse kam steps me pahunchna hai.
+
+Kya karna tha?
+Start word se end word tak shortest path nikalna hai.
+Agar possible nahi hai, to 0 return karna hai.
+✍️ maine 1 queue banaya hai jism mai 2 cheg rakhhe hua hu 1 jo wordse start hua hai dusra uska count or 1 unorder set banaoo taki mai usse data bar bar le shakta tc 0(1) me 
+
+Approach kya use kiya?
+Is problem ko ek graph ki tarah socha.
+Har word ek node hai, jisme 1 letter change se dusre word tak ja sakte ho.
+BFS (Breadth First Search) use kiya, kyunki BFS shortest path deta hai.
+
+Logic kaise chalega?
+Queue me start word rakho (step=1).
+Har word ke liye 1-1 letter change karke naye valid words banao.
+Jo word list me mile, queue me daal do aur visited mark kar do.
+Jaise hi end word mile → steps return kar do.
+Agar queue khali ho gayi aur end word nahi mila → return 0.
+
+Time: O(N * L * 26) ≈ O(N * L)
+(N = number of words, L = length of each word)
+Space: O(N * L) (word list + queue)
+
+class Solution {
+public:
+    int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> dict(wordList.begin(), wordList.end());
+        queue<pair<string, int>>qu;
+        qu.push({beginWord, 1});
+        dict.erase(beginWord);
+
+        while(!qu.empty()){
+            pair<string, int> p = qu.front();
+            string word = p.first;
+            int count = p.second;
+            qu.pop();
+            if(word == endWord){
+                return count;
+            }
+            for(int i=0; i<word.size(); i++){
+                char c = word[i];
+                for(int j =0; j<26; j++){
+                    word[i] = 'a' + j;
+                    if(dict.find(word) != dict.end()){
+                        qu.push({word, count+1});
+                        dict.erase(word);
+                    }
+                }
+                word[i] = c;
+            }
+        }
+        return 0;
+    }
+};
