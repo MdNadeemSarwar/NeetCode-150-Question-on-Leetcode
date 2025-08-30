@@ -1,0 +1,142 @@
+📌 Question Samajhna
+Ek aisa data structure design karna hai jo do operations support kare:
+addWord(word) → ek word ko store kar do.
+search(word) → check karo ki word present hai ya nahi.
+Special case: word ke andar '.' aa sakta hai, jo kisi bhi ek character ko represent karega.
+
+🎯 Intuition
+Agar simple array/vector me store karte → search ke time har word compare karna padta (slow).
+Trie (Prefix Tree) use karenge:
+Trie har character ko ek node ke form me store karega.
+isEndOfWord flag rakha jayega jo mark karega ki koi word yaha khatam hota hai.
+'.' ke liye → ek character nahi, sab possible children explore karna hoga (DFS recursion use karke).
+
+🛠️ Approach
+TrieNode structure banate hai:
+children[26] → har letter ka pointer.
+isEndOfWord → true agar word yaha end hota hai.
+addWord(word):
+Root se start karo.
+Har character ke liye child check karo. Agar child missing ho to naya node banao.
+Last character par isEndOfWord = true set kar do.
+search(word):
+Har character traverse karo.
+Agar normal letter hai → us child me move karo.
+Agar '.' hai → har child explore karo (recursively call searchUtil). Agar kisi me match mila → return true.
+Agar poora word traverse karke isEndOfWord == true hai → return true, warna false.
+
+📖 Dry Run Example Input:
+
+addWord("bad")
+addWord("dad")
+addWord("mad")
+search("pad") → ?
+search("bad") → ?
+search(".ad") → ?
+search("b..") → ?
+
+Trie ban gaya jisme bad, dad, mad store hai.
+search("pad") → 'p' se start hota hai, par trie me 'p' child nahi → ❌ False.
+search("bad") → har char match mil gaya → ✅ True.
+search(".ad") → pehle character '.' hai → humne children 'b', 'd', 'm' explore kiye. Teeno me "ad" mil gaya → ✅ True.
+search("b..") → pehle 'b' match hua, fir do '.' → matlab 'a', 'd' try kiya, end me word complete mila → ✅ True.
+
+⏱️ Time Complexity
+addWord(word) → O(L), jaha L = word ka length.
+search(word) →
+Normal case: O(L).
+Worst case (jab dots '.' ho) → O(26^k * L), jaha k = number of dots (yahaan ≤ 2).
+Practically fast hai.
+💾 Space Complexity
+Har node me 26 children array hai → O(26 * N * L) worst case,
+jaha N = number of words, L = average length.
+
+class WordDictionary {
+public:
+    
+    // Trie ke ek node ka structure banaya
+    struct trieNode { 
+        trieNode *children[26]; // har node ke 26 children (a-z ke liye)
+        bool isEndOfWord;       // true agar koi word yaha end hota hai
+    };
+    
+    // naya node banane ke liye helper function
+    trieNode* getNode() {
+        trieNode* newNode = new trieNode();   // ek new node allocate karte hai
+        newNode->isEndOfWord = false;         // initially koi word yaha end nahi hota
+        
+        // saare 26 children ko NULL se initialize karte hai
+        for (int i = 0; i < 26; i++) {
+			newNode->children[i] = NULL;
+		}
+        
+        return newNode;   // banaya hua node return kar diya
+    }
+    
+    /** Initialize your data structure here. */
+    trieNode* root;   // root node of Trie
+    
+    WordDictionary() {
+        root = getNode();   // constructor ke andar root ko initialize kiya
+    }
+    
+    // addWord function: word ko trie me insert karta hai
+    void addWord(string word) {
+        trieNode *crawler = root;   // root se start karte hai
+        
+        // har character ke liye loop
+        for (int i = 0; i < word.length(); i++) { 
+            int index = word[i] - 'a';  // character ka index (0-25)
+            
+            // agar child exist nahi karta to naya node banao
+            if (!crawler->children[index]) 
+                crawler->children[index] = getNode();
+            
+            // crawler ko us child par move kar do
+            crawler = crawler->children[index]; 
+        }
+        
+        // last character ke node par isEndOfWord = true set kar do
+        crawler->isEndOfWord = true; 
+    }
+    
+    // searchUtil function: DFS ki tarah kaam karta hai
+    // yeh word ko search karta hai, aur '.' ko handle karta hai
+    bool searchUtil(trieNode* root, string word) {
+        trieNode *crawler = root;   // root se start karte hai
+        
+        // word ke har character ke liye loop
+        for (int i = 0; i < word.length(); i++) { 
+            char ch = word[i];   // current character
+            
+            // agar '.' mila
+            if(ch == '.') {
+                // '.' ka matlab: sab children check karna padega
+                for(int j = 0; j < 26; j++) {
+                    if(crawler->children[j] != NULL) {
+                        // agar kisi child me baaki word match ho gaya
+                        if(searchUtil(crawler->children[j], word.substr(i+1)))
+                            return true; // to true return kar do
+                    }
+                }
+                // agar koi child match nahi hua
+                return false;
+                
+            } 
+            // agar normal character hai aur child exist nahi karta
+            else if (crawler->children[ch-'a'] == NULL) {
+                return false; // word match nahi hua
+            }
+            
+            // agar child exist karta hai to waha move kar jao
+            crawler = crawler->children[ch-'a']; 
+        }
+        // agar poora word traverse ho gaya aur isEndOfWord = true hai
+        return (crawler != NULL && crawler->isEndOfWord); 
+    }
+    
+    // ye function user ke call ke liye hai
+    bool search(string word) {
+        return searchUtil(root, word);   // root se searchUtil ko call karte hai
+    }
+};
