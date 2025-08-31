@@ -1,0 +1,69 @@
+Aapko diya hai s1, s2, aur s3. Poochna ye hai: kya s1 aur s2 ko mila ke s3 baan shakte ho (interleave karke) ban sakta hai, bina dono strings ke andar wale order ko todhe?
+Matlab s1 ke chars ka relative order wahi rehna chahiye; same for s2. 
+👉 Interleave ka matlab: dono strings ke characters ka order maintain rehna chahiye, but tum dono ko mix karke ek naya string bana sakte ho.
+pahle cheg s1 ka size + s2 ka size = s3 hona chahiye nahi hato false de do
+
+— Examples (samjha ke)
+s1="aabcc", s2="dbbca", s3="aadbbcbcac" → true
+Ek way: "aa"(s1) + "dbbc"(s2) + "bc"(s1) + "a"(s2) + "c"(s1) → matches.
+
+s1="aabcc", s2="dbbca", s3="aadbbbaccc" → false
+Kisi bhi order se s3 possible nahi.
+
+s1="", s2="", s3="" → true
+
+ — Intuition (kaise socho)
+Socho aapke paas do pointers: i into s1, j into s2.
+Hum s3[k] (k = i+j) ko banane ke liye decide karte hain: s3[k] s1[i] se liya ja sakta hai (agar match kare) ya s2[j] se (agar match kare).
+Ye ek binary decision tree banata hai → exponential paths (brute force).
+Lekin bahut si subproblems repeat hoti hain: same (i, j) par firse same decisions. Isliye memoization / DP se efficient banega.
+
+— Approach 1: Brute-force Recursion (simple, TLE ho sakta hai) TLE wala code alrweady submit hai question ke submit me jake check karo uska TC= O(N*M*K) hoga q ki 3 cheg change ho rah ahai
+Base: agar k == s3.length() → agar i==s1.length() aur j==s2.length() return true
+
+Complexity
+Time: O(n * m) because each (i,j) computed once.
+Space: O(n * m) for memo + recursion stack O(n+m).
+
+class Solution {
+public:
+    int m, n, N;
+    int t[101][101]; //{-1, 0, 1} -1 matlab solve nahi hua hai 0 false 1 true 
+
+    bool solve(int i, int j, string& s1, string& s2, string& s3) {
+        
+        if(i == m && j == n && i+j == N) {
+            return true;
+        }
+
+        if(i+j >= N) //other string didn't get consumed at all
+            return false;
+        
+        if(t[i][j] != -1){ // yahe se 1 return hua hoga yane true agar 0 hua hoha tp false
+            return t[i][j];
+        }
+
+        bool result = false;
+ 
+        if(s1[i] == s3[i+j]){
+            result = solve(i+1, j, s1, s2, s3);
+        }
+
+        if(result == true){
+            return t[i][j] = result;
+        }
+
+        if(s2[j] == s3[i+j]){
+            result = solve(i, j+1, s1, s2, s3);
+        }
+        return t[i][j] = result;    
+    }
+    
+    bool isInterleave(string s1, string s2, string s3) {
+        m = s1.length();
+        n = s2.length();
+        N = s3.length();
+        memset(t, -1, sizeof(t));        
+        return solve(0, 0, s1, s2, s3);
+    }
+};
