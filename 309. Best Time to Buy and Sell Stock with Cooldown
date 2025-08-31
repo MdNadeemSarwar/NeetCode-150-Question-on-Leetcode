@@ -1,0 +1,147 @@
+Tumhe ek prices[] array diya hai, jaha prices[i] = i-th day ka stock price.
+Tum jitni baar chaaho buy/sell kar sakte ho, but 2 rules hain:
+Ek time pe ek hi stock rakh sakte ho (sell karo tabhi fir buy kar sakte ho).
+Cooldown rule: Sell ke next din turant buy nahi kar sakte → us din cooldown karna hi padega.
+
+🔹 Example 1 Input: prices = [1,2,3,0,2]
+Day 0: Buy at 1
+Day 1: Sell at 2 → profit = 1
+Day 2: Cooldown (kyunki abhi-abhi sell kiya)
+Day 3: Buy at 0
+Day 4: Sell at 2 → profit = 2
+Total profit = 1 + 2 = 3
+✅ Answer = 3
+
+🔹 Intuition / Idea
+Yaha tumhe har din ke liye 3 states sochna hai:
+Buy → abhi stock kharida hua hai, haath me Hold hai.
+sold → abhi stock becha hai aur abhi abhi profit liya hai.
+rest → na buy na sell (ya toh idle din hai ya cooldown chal raha hai).
+
+🔹 Dry Run Input: prices = [1,2,3,0,2]
+Initialize: Day0: buy=-1 (buy), sold=0 (sell possible nahi), rest=0
+
+Day1 (price=2)
+buy = max(-1, 0-2) = -1
+sold = -1+2 = 1
+rest = max(0,0) = 0
+
+Day2 (price=3)
+buy = max(-1, 0-3) = -1
+sold = -1+3 = 2
+rest = max(0,1) = 1
+
+Day3 (price=0)
+buy = max(-1, 1-0) = 1
+sold = -1+0 = -1
+rest = max(1,2) = 2
+
+Day4 (price=2)
+buy = max(1, 2-2) = 1
+sold = 1+2 = 3
+rest = max(2,-1) = 2
+👉 Final Answer = max(sold, rest) = 3
+
+🔹 Time & Space Complexity
+Time Complexity: O(n) (har din 3 states calculate karte hain).
+Space Complexity: O(1) (sirf 3 variables lagte hain, pura DP array bhi nahi chahiye).
+
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        if (prices.empty()) return 0;
+        int n = prices.size();
+
+        // 3 states
+        int buy = -prices[0]; // agar day0 pe buy karte hain
+        int sold = 0;          // abhi tak kuch sell nahi kiya
+        int rest = 0;          // kuch nahi kiya (idle)
+
+        for (int i = 1; i < n; i++) {
+            int prevbuy = buy;
+            int prevSold = sold;
+            int prevRest = rest;
+
+            // Transition
+            buy = max(prevbuy, prevRest - prices[i]); // ya toh pehle se hold ya aaj buy
+            sold = prevbuy + prices[i];                // aaj sell kiya
+            rest = max(prevRest, prevSold);             // idle ya cooldown
+        }
+
+        // Final profit hamesha ya toh sold hoga ya rest
+        return max(sold, rest);
+    }
+};
+
+🔹 Step 4: Dry Run (exact format)
+
+Example: prices = [1,2,3,0,2]
+
+Start (day 0):
+price = 1
+hold = -1 (aapne day0 pe buy kiya → net = -1), sold = 0, rest = 0
+(Here action: buy on day0 is best so far.)
+
+i = 1 (day1, num = 2):
+prevHold = -1, prevSold = 0, prevRest = 0
+Compute:
+hold = max(prevHold, prevRest - price) = max(-1, 0 - 2 = -2) = -1
+→ matlab aaj buy karne se -2 milega (bura), isliye better to keep previous buy at 1.
+sold = prevHold + price = -1 + 2 = 1
+→ agar aaj sell karo (jo aapne day0 pe kharida tha), profit = 1.
+rest = max(prevRest, prevSold) = max(0,0) = 0
+Update: hold = -1, sold = 1, rest = 0
+Action interpretation: Optimal action up to today: sell on day1 gives profit 1.
+(So one optimal plan so far: buy day0 @1 → sell day1 @2 → profit 1)
+
+i = 2 (day2, num = 3):
+prevHold = -1, prevSold = 1, prevRest = 0
+Compute:
+hold = max(prevHold, prevRest - price) = max(-1, 0 - 3 = -3) = -1
+→ better to have kept earlier buy (if any).
+sold = prevHold + price = -1 + 3 = 2
+→ agar aapne day0 se hold karke aaj sell kiya to profit 2 (buy@1 sell@3).
+rest = max(prevRest, prevSold) = max(0,1) = 1
+→ rest becomes 1 because best of previous rest(0) ya previous sold(1) is 1.
+Update: hold = -1, sold = 2, rest = 1
+Action interpretation:
+There are two candidate histories:
+buy day0, sell day2 → sold = 2. (profit 2)
+buy day0, sell day1 (profit1) then rest day2 → rest = 1.
+Which one leads to final best depends on later days — DP stores both numbers.
+But if you follow the plan sell@day1, you are in rest=1 on day2 (cooldown day). That allows buying on day3.
+
+i = 3 (day3, num = 0):
+prevHold = -1, prevSold = 2, prevRest = 1
+Compute:
+hold = max(prevHold, prevRest - price) = max(-1, 1 - 0 = 1) = 1
+→ Important: prevRest - price = 1 - 0 = 1 means: agar aap cooldown/rest se aaj cheap price 0 pe buy kar lo, aapka net hold-value = 1. Iska matlab aaj buy is profitable (you carry previous profit and pay 0).
+sold = prevHold + price = -1 + 0 = -1
+→ selling today (if you had previously bought cheap) is bad (would be -1), so not chosen.
+rest = max(prevRest, prevSold) = max(1,2) = 2
+→ rest becomes 2 because selling at day2 (profit 2) is better than previous rest 1.
+Update: hold = 1, sold = -1, rest = 2
+Action interpretation (choose a plan):
+If we had sold at day1 and been rest=1 on day2, now on day3 price=0 we can buy (since cooldown is over). Buying yields hold = prevRest - 0 = 1. So one optimal sequence: buy@day0 sell@day1 (profit1), cooldown day2, buy@day3 @0 (now hold-value = 1).
+Alternatively if you had sold at day2 (profit2), rest becomes 2 — but then buying at day3 would be prevRest - 0 = 2 giving hold = 2 if you had that rest value. However DP picks hold = 1 because prevRest used here was 1 (from the path we consider). Either way, the DP numbers capture all options.
+(For the optimal final we follow plan: sold day1 → cooldown day2 → buy day3)
+
+i = 4 (day4, num = 2):
+prevHold = 1, prevSold = -1, prevRest = 2
+Compute:
+hold = max(prevHold, prevRest - price) = max(1, 2 - 2 = 0) = 1
+→ keep holding (we bought earlier at 0).
+sold = prevHold + price = 1 + 2 = 3
+→ if we sell today (we bought at day3@0), profit becomes 3 (this is 1 earlier profit carried + sell at 2 => total 3).
+rest = max(prevRest, prevSold) = max(2, -1) = 2
+Update: hold = 1, sold = 3, rest = 2
+Action interpretation: Sell today at price 2 → final total profit = 3.
+✅ Final result: max(sold, rest) = max(3, 2) = 3 → maximum profit = 3
+One clear optimal transaction sequence (human-readable):
+Day0: Buy at 1.
+Day1: Sell at 2. → profit = 1.
+Day2: Cooldown (can't buy on day2).
+Day3: Buy at 0.
+Day4: Sell at 2. → profit from this trade = 2.
+Total profit = 1 + 2 = 3.
