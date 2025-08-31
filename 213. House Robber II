@@ -1,0 +1,72 @@
+🔹 Problem ko Simple Bhasa me Samjho
+Tum ek robber ho aur tumhe max paisa lootna hai bina police ko bulaye.
+Condition ye hai ki tum adjacent houses ek sath loot nahi sakte.
+Aur is baar houses circular arrangement me hain → matlab first aur last house bhi adjacent hai.
+⚠️ Iska matlab hai ki tum first aur last house dono ek sath nahi loot sakte.
+
+🔹 Intuition (Sochne ka Tarika)
+Agar circular wali condition na hoti → ye normal House Robber I problem hoti.
+Ab circular hone ki wajah se do cases banate hain:
+Case 1: Rob houses from index 0 to n-2 (matlab last house chhod do).
+Case 2: Rob houses from index 1 to n-1 (matlab first house chhod do).
+👉 Dono cases me se jo max paisa aayega wahi answer hoga.
+
+🔹 Helper Function (House Robber I DP)
+Normal House Robber I ko DP (Dynamic Programming) se solve karte hain:
+dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+dp[i-1] → agar current house skip karte hain.
+dp[i-2] + nums[i] → agar current house loot lete hain.
+
+🔹 Dry Run Example
+Example: nums = [1,2,3,1]
+Case 1: rob [1,2,3] → answer = 3
+Case 2: rob [2,3,1] → answer = 4
+👉 Final = max(3, 4) = 4
+
+🔹 Time & Space Complexity
+Time: O(n) (ek baar traverse karna hai)
+Space: O(1) (sirf 2 variables prev1, prev2 use kar rahe hain)
+
+class Solution {
+public:
+    // Ye helper function ek linear house robber problem solve karta hai
+    // Matlab yaha circle ka tension nahi, sirf start se end tak max paisa nikalna hai
+    int robLinear(vector<int>& nums, int start, int end) {
+        int prev1 = 0, prev2 = 0; 
+        // prev1 = dp[i-1] store karega (previous house ka best answer)
+        // prev2 = dp[i-2] store karega (do house pehle ka best answer)
+
+        for (int i = start; i <= end; i++) {
+            // Agar current house (nums[i]) lete hain → prev2 + nums[i]
+            // Agar nahi lete → prev1
+            // Jo max hoga usko temp me store karenge
+            int temp = max(prev1, prev2 + nums[i]);
+
+            // Ab next iteration ke liye update karenge
+            prev2 = prev1;   // prev2 ko ek step aage badhao
+            prev1 = temp;    // prev1 ko best answer se update karo
+        }
+
+        // Loop ke end me prev1 hi final answer hoga
+        return prev1;
+    }
+
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        
+        // Agar sirf 1 house hai, wahi answer hoga
+        if (n == 1) return nums[0]; 
+        
+        // Agar 2 house hai, dono me se max choose karna hai
+        if (n == 2) return max(nums[0], nums[1]); 
+
+        // Case 1: First house ko include kar sakte hain, par last house nahi (0 to n-2)
+        int case1 = robLinear(nums, 0, n-2);
+
+        // Case 2: Last house ko include kar sakte hain, par first house nahi (1 to n-1)
+        int case2 = robLinear(nums, 1, n-1);
+
+        // Final answer hoga dono cases ka max
+        return max(case1, case2);
+    }
+};
