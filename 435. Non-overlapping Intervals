@@ -1,0 +1,57 @@
+Hume intervals ka array diya hai: intervals[i] = [start, end].
+Goal: minimum intervals remove karne hain taaki jo bache wo non-overlapping hoon.
+Note: Agar do intervals sirf end/start point pe touch karte hain (jaise [1,2] aur [2,3]), to overlap nahi mana jaayega.
+
+🔑 Key Idea (Greedy Approach):
+Agar hume overlaps avoid karne hain, to hume jitne zyada intervals rakh sakte hain unhe rakhna chahiye.
+Iske liye best strategy hai intervals ko unke end time ke basis pe sort karna.
+Kyun? Kyunki agar hum hamesha jaldi khatam hone wale interval ko rakhte hain, to agle intervals ke liye zyada jagah bachi rahegi.
+Fir iterate karke check karenge agar koi interval overlap kar raha hai to usko remove kar denge (count increase karenge).
+
+📝 Step by Step Approach:
+Sort intervals by their end time.
+Ek variable end rakho jo last chosen interval ka end store kare.
+Har interval traverse karo:
+Agar interval.start >= end → overlap nahi hai, to interval rakh lo aur end = interval.end update karo.
+Agar interval.start < end → overlap hai, to is interval ko remove karna padega (count++).
+
+Time & Space Complexity
+Time: Sorting O(n log n) + single pass O(n) ⇒ O(n log n)
+Space: Sorting in-place ⇒ O(1) extra (excluding sort’s internal stack)
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    int eraseOverlapIntervals(vector<vector<int>>& intervals) {
+        // Edge case: 0 or 1 interval -> already non-overlapping, remove 0
+        if (intervals.size() <= 1) return 0;
+
+        // 1) Sort by end time (earliest finishing first)
+        sort(intervals.begin(), intervals.end(),
+             [](vector<int>& a, vector<int>& b) {
+                 return a[1] < b[1];
+             });
+
+        int removed = 0;           // kitne intervals remove kiye
+        int end = INT_MIN;         // last selected interval ka end
+
+        // 2) Traverse sab intervals left-to-right
+        for (const auto& iv : intervals) {
+            int start = iv[0];
+            int finish = iv[1];
+
+            if (start >= end) {
+                // Non-overlapping with the last kept interval -> keep it
+                end = finish;      // ab ye last kept interval ban gaya
+            } else {
+                // Overlap aaya -> remove current interval
+                // Note: hum 'end' ko change nahi karte, kyunki sorted by finish
+                // me pehle se hi earliest finishing ko prefer kar rahe hain.
+                removed++;
+            }
+        }
+        return removed;
+    }
+};
