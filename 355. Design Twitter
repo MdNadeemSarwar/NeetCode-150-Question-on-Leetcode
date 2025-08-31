@@ -1,0 +1,146 @@
+Isme aapko basically ek mini social media platform banana hai jisme teen major features implement karne hain:
+Post Tweet
+Follow / Unfollow
+Get News Feed (10 latest tweets)
+Chalo isko step by step samajhte hain 👇
+
+🔹 Problem ko Simple Terms me
+Har user ke paas:
+Apne khud ke tweets hote hain.
+Uske followees (jo wo follow karta hai) ke tweets hote hain.
+News Feed → uske aur uske followees ke tweets me se sabse latest 10 tweets.
+
+🔹 Example Dry Run
+twitter.postTweet(1, 5);
+-> User 1 ne tweet 5 kiya
+
+twitter.getNewsFeed(1);
+-> Sirf apne tweet dikhne chahiye -> [5]
+
+twitter.follow(1, 2);
+-> User 1 ab User 2 ko follow kar raha hai
+
+twitter.postTweet(2, 6);
+-> User 2 ne tweet 6 kiya
+
+twitter.getNewsFeed(1);
+-> Ab User 1 ke feed me apna [5] + User 2 ka [6]
+   Latest order me -> [6, 5]
+
+twitter.unfollow(1, 2);
+-> User 1 ab User 2 ko unfollow kar diya
+
+twitter.getNewsFeed(1);
+-> Ab sirf apna tweet hi milega -> [5]
+Bilkul Twitter ka simplified version hai 👍
+
+🔹 Intuition for Data Structures
+unordered_map<int, unordered_set<int>> followees
+Yeh store karta hai → Kaun kisko follow kar raha hai
+Example: followees[1] = {2, 3}
+Matlab User 1 → User 2 aur User 3 ko follow karta hai.
+unordered_map<int, vector<pair<int,int>>> tweets
+Yeh store karta hai → Har user ke tweets aur unke timestamps
+Example: tweets[1] = { {0, 5}, {2, 10} }
+Matlab User 1 ne pehla tweet (id=5) time=0 par, aur dusra tweet (id=10) time=2 par kiya.
+Hum timestamp isliye store karte hain kyunki hume tweets ko latest order me sort karna hota hai.
+
+🔹 Approach 
+Tweet ka Time Maintain karna hoga
+Kyunki hume "most recent" chahiye. Isliye ek global timestamp rakhenge, har tweet ke saath store karenge.
+
+struct Tweet {
+    int time;
+    int id;
+};
+
+User -> Apne Tweets
+Har user ke tweets ko ek list/vector me store karenge.
+unordored_map<int, vector<Tweet>> tweets;
+
+User -> Followees
+Har user ke followees ka set rakhenge.
+unordered_map<int, unordered_set<int>> follows;
+
+NewsFeed
+Jab bhi kisi user ka feed mangte hain:
+Us user ke tweets + sab followees ke tweets uthao.
+Sabse latest 10 tweets return karo.
+Efficiently karne ke liye max-heap / priority_queue use karenge (tweets ko time ke hisaab se sort karne ke liye).
+
+Complexity Analysis
+postTweet → O(1) (sirf vector me push_back).
+follow/unfollow → O(1) (unordered_set insert/erase).
+getNewsFeed → Worst case me user + uske followees ke sab tweets heap me daalne padenge.
+Har user max 10 recent tweets consider karne ki optimization bhi possible hai (toh complexity manageable ho jaati hai).
+Practically → O((N log N)) per feed fetch, where N = total tweets in consideration.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Twitter {
+private:
+    int timeStamp; 
+    // timeStamp -> global counter jo har tweet ke time ko track karega (0,1,2,...)
+
+    unordered_map<int, unordered_set<int>> followees; 
+    // Map: userId -> { set of followees }
+    // Example: followees[1] = {2, 3} means user1 follows user2 & user3
+
+    unordered_map<int, vector<pair<int,int>>> tweets; 
+    // Map: userId -> vector of {time, tweetId}
+    // Example: tweets[1] = { {0, 5}, {2, 10} }
+
+public:
+    Twitter() {
+        timeStamp = 0;  
+        // Shuru me koi tweet nahi hai, to time = 0 rakha
+    }
+    
+    void postTweet(int userId, int tweetId) {
+        // Jab user koi tweet karega, hum uska (currentTime, tweetId) store karenge
+        tweets[userId].push_back({timeStamp++, tweetId});
+        // timeStamp++ -> har naya tweet unique time par hoga
+    }
+    
+    vector<int> getNewsFeed(int userId) {
+        // Max-heap banayenge jisme (time, tweetId) rakhenge
+        // Kyunki hume latest (maximum time) wale tweets chahiye
+        priority_queue<pair<int,int>> pq;
+
+        // Step 1: Apne tweets heap me daal do
+        for (auto &tw : tweets[userId]) {
+            pq.push(tw);  // tw = {time, tweetId}
+        }
+
+        // Step 2: Apne followees ke tweets bhi heap me daal do
+        for (int f : followees[userId]) {
+            for (auto &tw : tweets[f]) {
+                pq.push(tw);
+            }
+        }
+
+        // Step 3: Heap ke top 10 tweets nikalo (sabse latest)
+        vector<int> res;
+        int cnt = 0;
+        while (!pq.empty() && cnt < 10) {
+            res.push_back(pq.top().second); // tweetId
+            pq.pop();
+            cnt++;
+        }
+
+        return res; // Latest 10 tweetIds return kar diye
+    }
+    
+    void follow(int followerId, int followeeId) {
+        // Agar banda apne aapko follow karega to ignore kar do
+        if (followerId == followeeId) return;
+        // Warna followees list me add kar do
+        followees[followerId].insert(followeeId);
+    }
+    
+    void unfollow(int followerId, int followeeId) {
+        // Follower apne followee ko unfollow karega
+        followees[followerId].erase(followeeId);
+    }
+};
