@@ -1,0 +1,84 @@
+🔹 Question Samajhna
+Tumhare paas ek array nums hai jo balloons ko represent karta hai.
+Agar tum i-th balloon phodte ho, coins milenge:
+nums[i-1] * nums[i] * nums[i+1]
+Agar left/right bound se bahar chale gaye → usko 1 maan lo.
+Tumhe sab balloons phodne hain is tarike se ki coins maximum mile.
+
+🔹 Example 1: nums = [3, 1, 5, 8]
+Socho tum left se phodte gaye:
+
+[3,1,5,8] -> pehle 1 phoda: 3*1*5 = 15
+[3,5,8]   -> ab 5 phoda: 3*5*8 = 120
+[3,8]     -> ab 3 phoda: 1*3*8 = 24
+[8]       -> last 8 phoda: 1*8*1 = 8
+Total = 167
+Lekin agar order galat liya to kam coins milenge.
+👉 Matlab hume order wisely choose karna hai.
+
+🔹 Intuition / Approach
+Is type ke interval problems me ek reverse thinking trick hoti hai:
+Instead of thinking which balloon to burst first, socho:
+👉 "Agar mai मान लूं कि i-th balloon interval [L..R] me last phoda to uske left aur right me subproblems ban jayenge."
+Example: Agar array = [1, 3, 1, 5, 8, 1] (humne boundary ke liye 1 add kar diye start & end me)
+Suppose last balloon phoda index k (between L..R),
+toh coins honge:
+coins = nums[L] * nums[k] * nums[R] + dp[L][k] + dp[k][R]
+nums[L] * nums[k] * nums[R] = current balloon ke last phodne se mile coins
+dp[L][k] = left interval ke max coins
+dp[k][R] = right interval ke max coins
+👉 Ab hum bas har interval ke liye best k choose karte hain.
+
+🔹 DP Definition
+dp[L][R] = max coins by bursting balloons strictly between L and R
+Answer = dp[0][n+1]
+
+🔹 Steps
+Array ko padhao aur boundary 1 add karo:
+nums = [1, 3, 1, 5, 8, 1]
+Fill dp table for increasing interval length.
+Har interval [L..R] ke liye try all k, jo last burst hoga.
+
+🔹 Dry Run on Example [3,1,5,8]
+After boundary add:
+nums = [1, 3, 1, 5, 8, 1]
+Interval (0,5):
+
+Try k=1 → coins = 131 + dp(0,1)+dp(1,5)
+Try k=2 → coins = 111 + dp(0,2)+dp(2,5)
+Try k=3 → coins = 151 + dp(0,3)+dp(3,5)
+Try k=4 → coins = 181 + dp(0,4)+dp(4,5)
+DP gradually fills → final answer = 167.
+
+🔹 Time & Space Complexity
+Time: 3 nested loops: O(n^3) (n ≤ 300, acceptable)
+Space: DP table: O(n^2)
+
+class Solution {
+public:
+    int maxCoins(vector<int>& nums) {
+       int n = nums.size();
+        // Step 1: Boundary balloons (1 at both ends)
+        nums.insert(nums.begin(), 1);
+        nums.push_back(1);
+        
+        // dp[L][R] = max coins from interval (L,R)
+        vector<vector<int>> dp(n+2, vector<int>(n+2, 0)); 
+
+        // Step 2: Interval DP
+        // length = interval size
+        for (int len = 2; len <= n+1; len++) {
+            for (int L = 0; L + len <= n+1; L++) {
+                int R = L + len;
+                // Step 3: Try every balloon k between L and R
+                for (int k = L+1; k < R; k++) {
+                    int coins = nums[L] * nums[k] * nums[R];
+                    coins += dp[L][k] + dp[k][R];
+                    dp[L][R] = max(dp[L][R], coins);
+                }
+            }
+        }
+        
+        return dp[0][n+1];
+    }
+};
