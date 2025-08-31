@@ -1,0 +1,98 @@
+🔴 Problem samajh
+Hume coins ka array diya hai (e.g. [1,2,5])
+Aur ek amount diya hai (e.g. 11)
+Hume banana hai: minimum number of coins jo us amount ko banayen.
+Agar possible hi na ho, to -1 return karo.
+Har coin unlimited hai (infinite supply).
+
+🟢 Example samajh
+Example 1
+coins = [1,2,5], amount = 11
+Possible combinations:
+5+5+1 → 3 coins
+2+2+2+2+2+1 → 6 coins
+1+1+...+1 (11 times) → 11 coins
+Minimum = 3 ✅
+
+Example 2
+coins = [2], amount = 3
+Only 2 is available → possible sums: 0,2,4,6…
+3 kabhi nahi banega ❌ → return -1.
+
+Example 3
+coins = [1], amount = 0
+Kuch bhi nahi chahiye → 0 coins. ✅
+
+Intuition (soch kaise banate hain):
+Greedy nahi chalega –
+Agar hamesha sabse bada coin lo, toh galat ho sakta hai.
+Example: Coins {1,3,4}, Amount = 6.
+Greedy lega 4 + 1 + 1 = 3 coins.
+Best hai 3 + 3 = 2 coins.
+Isliye hamesha try karna padega sab coins ke combinations.
+
+Ye problem typical DP (Dynamic Programming) hai.
+Kyunki:
+Bade problem ko tod kar chhote problems solve ho jate hain.
+Example: 11 banane ke liye → Socho last coin kaunsa tha?
+Agar last coin 5 hai → bacha 11-5 = 6. Matlab ab 6 ka answer nikaalna hai.
+Agar last coin 2 hai → bacha 11-2 = 9. Matlab 9 ka answer nikaalna hai.
+Agar last coin 1 hai → bacha 11-1 = 10. Matlab 10 ka answer nikaalna hai.
+So formufa ban gaya: dp[amount] = 1 + min(dp[amount - coin]) for all coins
+Yahaan 1 add kar rahe kyunki humne ek coin use kiya hai.
+
+Dry Run Example (Coins = {1,2,5}, Amount = 11)
+Hum bottom-up DP use karte hain.
+Banate hain ek array dp[0..11] jisme dp[i] = minimum coins to make amount i.
+Initially dp[0] = 0 (kyunki 0 amount banane ke liye 0 coins chahiye).
+Baaki sabko infinity se fill kar dete hain.
+
+Now fill step by step:
+dp[1] → last coin = 1 → dp[0] + 1 = 1 → ✅ so dp[1]=1
+dp[2] → try coin 1 → dp[1]+1=2, try coin 2 → dp[0]+1=1 → ✅ best = 1 → dp[2]=1
+dp[3] → try 1 → dp[2]+1=2, try 2 → dp[1]+1=2, try 5 (not possible) → ✅ best=2 → dp[3]=2
+dp[4] → try 1 → dp[3]+1=3, try 2 → dp[2]+1=2, try 5 (not possible) → ✅ best=2 → dp[4]=2
+dp[5] → try 1 → dp[4]+1=3, try 2 → dp[3]+1=3, try 5 → dp[0]+1=1 → ✅ best=1 → dp[5]=1
+... aise hi dp[11] tak nikalte rahenge.
+Finally: dp[11] = 3 (kyunki best hai 5 + 5 + 1).
+
+Short Summary (exam ya notes ke liye):
+Problem → minimum coins to make amount.
+Greedy fail karta hai, isliye DP use hota hai.
+Recurrence: dp[x] = 1 + min(dp[x - c]) for all coins c
+Base case → dp[0] = 0.
+Answer → dp[amount] else -1.
+
+Time Complexity: O(amount × n)
+Space Complexity: O(amount)
+
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+         // DP array banate hain jisme dp[i] ka matlab hai:
+        // "amount i banane ke liye minimum coins kitne chahiye"
+        vector<int> dp(amount + 1, amount + 1);
+        
+        // Base case: amount 0 banane ke liye 0 coins chahiye
+        dp[0] = 0;
+        
+        // Har ek amount ke liye 1 se amount tak solve karenge
+        for (int i = 1; i <= amount; i++) {
+            // Har coin ko try karenge
+            for (int coin : coins) {
+                // Agar current coin use ho sakta hai (i.e., coin <= i)
+                if (coin <= i) {
+                    // Transition relation:
+                    // dp[i] = min(dp[i], 1 + dp[i - coin])
+                    // Yaani agar mai coin use karta hu, to ek coin count hoga
+                    // aur baaki amount (i - coin) ka solution dp[i - coin] me milega
+                    dp[i] = min(dp[i], 1 + dp[i - coin]);
+                }
+            }
+        }
+        
+        // Agar dp[amount] abhi bhi bada hai (amount+1), iska matlab solution nahi mila
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+};
+
