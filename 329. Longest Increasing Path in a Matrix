@@ -1,0 +1,91 @@
+🔹 Problem Samajhna Tumhare paas ek m x n matrix hai, aur tumhe longest increasing path nikalna hai.
+Rules: Tum 4 directions me move kar sakte ho: up, down, left, right.
+Diagonal ya matrix ke bahar se nahi jaa sakte.
+Har move me next number strictly bada hona chahiye.
+Example 1:
+matrix = [[9,9,4],
+          [6,6,8],
+          [2,1,1]]
+Longest increasing path: [1 → 2 → 6 → 9] → length = 4
+
+🔹 Intuition / Approach
+Ye problem DFS + Memoization (Top-Down DP) ka classic case hai:
+DFS from each cell:
+Har cell se explore karo aur longest increasing path find karo.
+Memoization:
+Har cell ka result store karo (dp[i][j]) → agar fir se ussi cell pe DFS aaye to repeat na kare.
+Ye time complexity ko dramatically reduce karta hai.
+
+🔹 Step-by-Step Logic
+Create dp[m][n] initialized with 0.
+dp[i][j] = longest increasing path starting from (i,j).
+DFS function (i,j):
+Agar dp[i][j] != 0 → return dp[i][j]
+Else, explore 4 directions: up, down, left, right
+Only move if matrix[new_i][new_j] > matrix[i][j]
+dp[i][j] = max(dp[i][j], 1 + dfs(new_i,new_j))
+Answer = maximum of dp[i][j] for all cells.
+
+✅ Har line ka purpose + intuition comment me add kar diya hai.
+dirs → movement directions
+dfs → recursive search + memoization
+dp[i][j] → longest path starting at (i,j)
+Outer loops → consider every cell as starting point
+
+🔹 Complexity Analysis
+Time: O(m*n) Har cell me DFS ek baar hi execute hoga (memoization se).
+Space: O(m*n) for DP + recursion stack  Worst case stack = O(m*n)
+
+#include <bits/stdc++.h>  // Standard library sab kuch include karne ke liye
+using namespace std;
+
+class Solution {
+private:
+    // dirs vector 4 directions ko represent karta hai: up, right, down, left
+    // pairs: (-1,0),(0,1),(1,0),(0,-1) using trick with dirs[d] & dirs[d+1]
+    vector<int> dirs = {-1, 0, 1, 0, -1}; // last -1 is to loop back correctly
+
+    // DFS function: longest increasing path starting from (i,j)
+    int dfs(vector<vector<int>>& matrix, vector<vector<int>>& dp, int i, int j) {
+        if(dp[i][j] != 0) return dp[i][j]; // Agar pehle compute ho chuka hai to return karo
+
+        int m = matrix.size();    // matrix rows
+        int n = matrix[0].size(); // matrix cols
+        int maxLen = 1; // Minimum path length = 1 (cell itself)
+
+        // Explore 4 directions
+        for(int d = 0; d < 4; d++) {
+            int x = i + dirs[d];     // next row
+            int y = j + dirs[d+1];   // next col
+
+            // Check bounds and strictly increasing condition
+            if(x >= 0 && x < m && y >= 0 && y < n && matrix[x][y] > matrix[i][j]) {
+                // Recursively call dfs for next cell and take max length
+                maxLen = max(maxLen, 1 + dfs(matrix, dp, x, y));
+            }
+        }
+
+        dp[i][j] = maxLen; // Memoize result
+        return maxLen;     // Return max length from (i,j)
+    }
+
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        int m = matrix.size();       // rows
+        int n = matrix[0].size();    // columns
+
+        // DP table initialized to 0, store longest path starting from each cell
+        vector<vector<int>> dp(m, vector<int>(n, 0));
+
+        int ans = 0; // Store overall longest path
+
+        // Loop through every cell as starting point
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
+                ans = max(ans, dfs(matrix, dp, i, j)); // Take maximum of all dfs calls
+            }
+        }
+
+        return ans; // Final answer
+    }
+};
