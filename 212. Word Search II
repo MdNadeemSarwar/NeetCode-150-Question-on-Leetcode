@@ -1,0 +1,113 @@
+1️⃣ Problem samajh lo
+Tumhare paas ek board hai: m x n letters ka.
+Tumhare paas ek words ki list hai.
+Tumhe ye words board pe dhundhne hai sequentially adjacent letters se.
+Rules: Adjacent = up, down, left, right. (diagonal nahi)
+Ek letter cell ek word me sirf ek baar use kar sakte ho.
+
+Example:
+Board:
+o a a n
+e t a e
+i h k r
+i f l v
+
+Words = ["oath","pea","eat","rain"]
+"oath" ✅ board pe mil raha: o->a->t->h
+"eat" ✅ board pe mil raha: e->a->t
+"pea" ❌ nahi mil raha
+"rain" ❌ nahi mil raha
+Output: ["eat", "oath"]
+
+2️⃣ Intuition (Logic)
+Problem me board chhota hai (12x12 max), par words bohot saare ho sakte hai (30k) → iska matlab brute force har word check karna slow hoga.
+Solution = Trie + DFS
+Trie = ek tree structure jisme words ko prefix ke through store karte hai.
+DFS = board ke har cell se start karke, 4 direction me explore karna.
+
+3️⃣ Approach step by step
+Sab words ko Trie me dal do.
+Board ke har cell (i,j) se DFS start karo.
+DFS me: Check karo current path Trie me exist karta hai ya nahi.
+Agar word complete mil gaya → add to result.
+Explore 4 directions: up, down, left, right.
+Cell ko visit mark karo (#) taki reuse na ho.
+DFS ke baad backtrack karo → cell ko wapas original letter me restore karo.
+4️⃣ Dry Run Example Board:
+o a a n
+e t a e
+i h k r
+i f l v
+Words: ["oath","eat"
+
+Start (0,0) → o
+Trie me prefix check → yes
+(0,1) → a → prefix exists
+(1,1) → t → prefix exists
+(2,1) → h → word "oath" found ✅
+Add "oath" to result
+
+Start (1,0) → e
+DFS explore → eventually "eat" found ✅
+Result: ["eat", "oath"]
+Sab words milne ke baad return karo result.
+
+6️⃣ Complexity
+Time: O(M * N * 4^L) worst case
+M,N = board size, L = max word length
+Trie se unnecessary paths cut ho jaate hai → fast
+Space: O(W*L) for Trie + O(L) DFS recursion stack
+
+class Solution {
+    // TrieNode structure banaya words ko store karne ke liye
+    struct TrieNode {
+        unordered_map<char, TrieNode*> children; // har character ka next node
+        string word = ""; // agar ye node kisi word ka end hai to word store hoga
+    };
+    
+    // Trie build karne ka function
+    TrieNode* buildTrie(vector<string>& words) {
+        TrieNode* root = new TrieNode(); // root node banaya
+        for (string word : words) { // har word ke liye
+            TrieNode* node = root; // start from root
+            for (char c : word) { // har character ke liye
+                if (!node->children.count(c)) // agar character already nahi hai
+                    node->children[c] = new TrieNode(); // new node create karo
+                node = node->children[c]; // move to next node
+            }
+            node->word = word; // last character pe word store karo (word ka end mark)
+        }
+        return root; // root return karo
+    }
+    
+    // DFS function to explore board
+    void dfs(vector<vector<char>>& board, int i, int j, TrieNode* node, vector<string>& result) {
+        char c = board[i][j]; // current cell ka character
+        if (!node->children.count(c)) return; // agar Trie me prefix nahi hai to return
+        node = node->children[c]; // move to next Trie node
+        if (node->word != "") { // agar word complete mil gaya
+            result.push_back(node->word); // result me add karo
+            node->word = ""; // duplicate avoid karne ke liye empty kar do
+        }
+        
+        board[i][j] = '#'; // mark current cell visited
+        vector<pair<int,int>> dirs = {{0,1},{1,0},{0,-1},{-1,0}}; // 4 directions: right, down, left, up
+        for (auto [dx,dy] : dirs) { // har direction explore karo
+            int x=i+dx, y=j+dy; // next cell coordinates
+            if (x>=0 && x<board.size() && y>=0 && y<board[0].size() && board[x][y]!='#') // valid cell check
+                dfs(board,x,y,node,result); // recursive DFS
+        }
+        board[i][j] = c; // backtrack: cell ko original value wapas karo
+    }
+    
+public:
+    // Main function to find all words
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        vector<string> result; // result vector
+        TrieNode* root = buildTrie(words); // Trie build karo words se
+        for (int i=0;i<board.size();i++) // har row me
+            for (int j=0;j<board[0].size();j++) // har column me
+                dfs(board,i,j,root,result); // DFS start karo
+        return result; // sab words return karo
+    }
+};
