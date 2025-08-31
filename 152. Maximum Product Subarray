@@ -1,0 +1,47 @@
+🔹 Step 1: Question: Aapko ek integer array nums diya gaya hai (positive, negative, aur zero numbers ho sakte hain). Aapko us subarray (continuous elements) ka maximum product nikalna hai.
+Return karo maximum product.
+
+🔹 Step 2: Intuition (Question ka hidden twist)
+Agar sirf positive numbers hote → easy, saare multiply karke max nikal lete.
+Problem aati hai negative numbers aur 0 ke wajah se:
+Zero → multiplication reset kar deta hai. (Kuch bhi × 0 = 0)
+Negative numbers → 2 negative mil ke positive product banate hain.
+Example: [-2, -3] → product = 6 (jo max ho sakta hai).
+Matlab kabhi negative bhi best answer de sakta hai.
+👉 Isliye hume dono track karna padega:
+max product till now (because positive maximize karta hai),
+min product till now (because ek aur negative mile toh min × neg → bada max ban sakta hai).
+
+🔹 Step 3: Algo Approach
+maxProd aur minProd ko track karte raho for every index.
+Current number num ke saath teen option compare karte hain:
+sirf num (start new subarray),
+num * maxProd (extend previous max),
+num * minProd (extend previous min, ho sakta hai negative × negative → bada ban jaye).
+Har step pe:
+tempMax = max(num, num*maxProd, num*minProd)
+tempMin = min(num, num*maxProd, num*minProd)
+fir maxProd = tempMax, minProd = tempMin
+Global answer me max store karte raho.
+
+🔹 Step 4: Dry Run
+Example: nums = [2,3,-2,4]
+Start:
+maxProd = 2, minProd = 2, ans = 2
+i = 1 (num = 3):
+max option → max(3, 3*2, 3*2) = max(3, 6, 6) = 6
+min option → min(3, 3*2, 3*2) = min(3, 6, 6) = 3
+→ maxProd = 6, minProd = 3, ans = 6
+i = 2 (num = -2):
+max option → max(-2, -2*6, -2*3) = max(-2, -12, -6) = -2
+min option → min(-2, -2*6, -2*3) = min(-2, -12, -6) = -12
+→ maxProd = -2, minProd = -12, ans = 6
+i = 3 (num = 4):
+max option → max(4, 4*-2, 4*-12) = max(4, -8, -48) = 4
+min option → min(4, 4*-2, 4*-12) = min(4, -8, -48) = -48
+→ maxProd = 4, minProd = -48, ans = 6
+✅ Final ans = 6
+
+🔹 Step 5: Time & Space Complexity
+Time: O(n) (ek pass me nikal lenge).
+Space: O(1) (sirf kuch variables use ho rahe).
