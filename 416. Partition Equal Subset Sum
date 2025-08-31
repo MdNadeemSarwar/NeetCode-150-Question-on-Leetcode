@@ -1,0 +1,75 @@
+Hume ek array nums diya hai. Hume check karna hai:
+Kya array ke elements ko do subsets me aise tod sakte hain ki dono subsets ka sum equal ho?
+Matlab:
+Agar total sum odd hai → bilkul possible nahi (kyunki odd number 2 me equal divide hi nahi ho sakta).
+Agar total sum even hai → tab check karna hai ki kya koi subset exist karta hai jiska sum = totalSum / 2.
+Kyunki agar ek subset ka sum total/2 ho gaya, to bacha hua subset automatically total/2 hoga.
+
+Example 1 nums = [1, 5, 11, 5]
+Total sum = 22 (even ✔️). Target subset sum = 11.
+Kya koi subset hai jiska sum 11 ho?
+Haan → [11] ya [5,5,1].
+✅ Answer = true.
+
+Example 2 nums = [1,2,3,5]
+Total sum = 11 (odd ❌).
+Equal partition possible nahi.
+✅ Answer = false.
+
+🔹 Intuition
+Ye problem ek classic Dynamic Programming (Subset Sum / Knapsack type) hai.
+Agar sum(nums) odd hai → directly false.
+Agar even hai → check karna hai ki target = sum(nums)/2 possible hai ya nahi.
+Har number ke liye do options hote hain:
+Include karna hai subset me
+Exclude karna hai subset se
+Agar kabhi koi path me target ban gaya → return true.
+
+📝 Dry Run Example
+Input: nums = [1,5,11,5]
+total = 22 → even ✔ → target = 11.
+dp initially: [true, false, false, ... false] (length 12).
+
+Process 1:
+j = 11..1
+dp[1] = true (kyunki dp[0] true hai).
+Now dp = [1,1,0,0,0,0,0,0,0,0,0,0]
+
+Process 5:
+j=11..5
+dp[5] = true (from dp[0])
+dp[6] = true (from dp[1])
+Now dp me {0,1,5,6} possible.
+
+Process 11:
+j=11 check → dp[11-11] = dp[0] = true → dp[11] = true.
+Bingo ✅ target mil gaya!
+
+Time Complexity: O(n * target)
+Space Complexity: O(target)
+
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+        int total = accumulate(nums.begin(), nums.end(), 0);
+        
+        // Agar total sum odd hai -> kabhi equal partition possible nahi
+        if (total % 2 != 0) return false;
+        
+        int target = total / 2;
+        int n = nums.size();
+        
+        // DP array: dp[j] = kya sum j possible hai?
+        vector<bool> dp(target + 1, false);
+        dp[0] = true;  // sum 0 always possible (empty subset)
+        
+        // Har number process karo
+        for (int num : nums) {
+            // Peeche se iterate karte hain to overwrite ka issue na ho
+            for (int j = target; j >= num; j--) {
+                if (dp[j - num]) dp[j] = true;
+            }
+        }
+        return dp[target];
+    }
+};
