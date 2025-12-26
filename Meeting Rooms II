@@ -1,0 +1,26 @@
+
+class Solution {
+public:
+    int minMeetingRooms(vector<Interval>& intervals) {
+        if (intervals.empty()) return 0;
+
+        sort(intervals.begin(), intervals.end(),
+             [](Interval &a, Interval &b){
+                 return a.start < b.start;
+        });
+
+       priority_queue<int, vector<int>, greater<int>> pq;
+
+        for (auto &it : intervals) {
+            int start = it.start;
+            int end = it.end;
+
+            if (!pq.empty() && pq.top() <= start) {
+                pq.pop();   // reuse day
+            }
+
+            pq.push(end);   // occupy day
+        }
+        return pq.size();   // total days needed 
+    }
+};
